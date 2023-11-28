@@ -40,7 +40,7 @@ public class AuthService {
 
         userRepository.findByAccount(request.getAccount())
                 .filter(user -> {
-                    if (request.getAccount().equals(user.getPassword())) {
+                    if (request.getPassword().equals(user.getPassword())) {
                         return true;
                     } else {
                         throw new CustomException(ErrorCode.USER_PASSWORD_MISMATCH);
