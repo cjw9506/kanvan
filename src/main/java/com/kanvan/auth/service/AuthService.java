@@ -1,5 +1,6 @@
 package com.kanvan.auth.service;
 
+import com.kanvan.auth.dto.UserLoginRequest;
 import com.kanvan.auth.dto.UserSignupRequest;
 import com.kanvan.common.exception.CustomException;
 import com.kanvan.common.exception.ErrorCode;
@@ -30,5 +31,20 @@ public class AuthService {
                 .build();
 
         userRepository.save(user);
+    }
+
+    public void login(UserLoginRequest request) {
+
+        userRepository.findByAccount(request.getAccount())
+                .filter(user -> {
+                    if (request.getAccount().equals(user.getPassword())) {
+                        return true;
+                    } else {
+                        throw new CustomException(ErrorCode.USER_PASSWORD_MISMATCH);
+                    }
+                })
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        //todo jwt 발급
     }
 }
