@@ -1,6 +1,8 @@
 package com.kanvan.auth.service;
 
 import com.kanvan.auth.dto.UserSignupRequest;
+import com.kanvan.common.exception.CustomException;
+import com.kanvan.common.exception.ErrorCode;
 import com.kanvan.user.domain.User;
 import com.kanvan.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
@@ -18,7 +20,7 @@ public class AuthService {
     public void signup(UserSignupRequest request) {
 
         if (userRepository.findByAccount(request.getAccount()).isPresent()) {
-            throw new IllegalStateException(); //todo 예외처리 생성
+            throw new CustomException(ErrorCode.USER_ALREADY_EXIST);
         }
 
         User user = User.builder()
