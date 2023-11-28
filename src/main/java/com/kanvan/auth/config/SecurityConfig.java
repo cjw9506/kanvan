@@ -22,6 +22,7 @@ public class SecurityConfig {
         return http
                 .authorizeHttpRequests(request -> request
                         .requestMatchers(POST, "/api/signup").permitAll()
+                        .requestMatchers(POST, "/api/login").permitAll()
                         .anyRequest().authenticated()
                 )
 
