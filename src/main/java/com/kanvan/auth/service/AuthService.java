@@ -17,7 +17,9 @@ public class AuthService {
     @Transactional
     public void signup(UserSignupRequest request) {
 
-        //todo 계정 중복 검사
+        if (userRepository.findByAccount(request.getAccount()).isPresent()) {
+            throw new IllegalStateException(); //todo 예외처리 생성
+        }
 
         User user = User.builder()
                 .account(request.getAccount())
