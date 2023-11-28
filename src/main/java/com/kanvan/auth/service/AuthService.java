@@ -1,7 +1,9 @@
 package com.kanvan.auth.service;
 
 import com.kanvan.auth.dto.UserLoginRequest;
+import com.kanvan.auth.dto.UserLoginResponse;
 import com.kanvan.auth.dto.UserSignupRequest;
+import com.kanvan.auth.jwt.JwtUtils;
 import com.kanvan.common.exception.CustomException;
 import com.kanvan.common.exception.ErrorCode;
 import com.kanvan.user.domain.User;
@@ -15,6 +17,7 @@ import org.springframework.stereotype.Service;
 public class AuthService {
 
     private final UserRepository userRepository;
+    private final JwtUtils jwtUtils;
 
 
     @Transactional
@@ -33,7 +36,7 @@ public class AuthService {
         userRepository.save(user);
     }
 
-    public void login(UserLoginRequest request) {
+    public UserLoginResponse login(UserLoginRequest request) {
 
         userRepository.findByAccount(request.getAccount())
                 .filter(user -> {
@@ -45,6 +48,8 @@ public class AuthService {
                 })
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        //todo jwt 발급
+        return UserLoginResponse.builder()
+                .bearer(jwtUtils.generateAccessToken(request.getAccount()))
+                .build();
     }
 }

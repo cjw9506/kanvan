@@ -1,6 +1,7 @@
 package com.kanvan.auth.controller;
 
 import com.kanvan.auth.dto.UserLoginRequest;
+import com.kanvan.auth.dto.UserLoginResponse;
 import com.kanvan.auth.dto.UserSignupRequest;
 import com.kanvan.auth.service.AuthService;
 import jakarta.validation.Valid;
@@ -31,8 +32,8 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody UserLoginRequest request) {
 
-        authService.login(request);
+        UserLoginResponse response = authService.login(request);
 
-        return ResponseEntity.status(OK).body(null);
+        return ResponseEntity.status(OK).body(response);
     }
 }
