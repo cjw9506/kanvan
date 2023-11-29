@@ -50,8 +50,9 @@ public class TeamController {
     }
 
     @GetMapping("/{teamId}")
-    public ResponseEntity<?> getTeam(@PathVariable(name = "teamId") Long teamId) {
-        TeamDetailResponse response = teamService.getTeam(teamId);
+    public ResponseEntity<?> getTeam(@PathVariable(name = "teamId") Long teamId,
+                                     Authentication authentication) {
+        TeamDetailResponse response = teamService.getTeam(teamId, authentication);
 
         return ResponseEntity.status(OK).body(response);
     }
