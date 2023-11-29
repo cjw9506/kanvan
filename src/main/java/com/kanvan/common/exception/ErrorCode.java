@@ -15,6 +15,10 @@ public enum ErrorCode {
 
     //team
     TEAM_IS_EXIST(HttpStatus.BAD_REQUEST, "T001", "이미 팀명이 존재합니다."),
+    TEAM_NOT_FOUND(HttpStatus.NOT_FOUND, "T002", "해당 팀이 존재하지 않습니다."),
+
+    //member
+    MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "M001", "해당 멤버는 존재하지 않습니다."),
     ;
 
     private final HttpStatus httpStatus;
