@@ -90,8 +90,6 @@ public class TeamService {
                        Long inviteId,
                        Authentication authentication) {
 
-        //todo 초대 거절 -> 삭제
-
         //수락할 유저
         User user = userRepository.findByAccount(authentication.getName()).orElseThrow(
                 () -> new CustomException(ErrorCode.USER_NOT_FOUND));
@@ -101,7 +99,11 @@ public class TeamService {
                 () -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
 
         if (waitingMember.getMember().equals(user)) {
-            waitingMember.updateInviteStatus(request.getInvite());
+            if (request.getInvite() == Invite.REFUSE) {
+                memberRepository.delete(waitingMember);
+            } else {
+                waitingMember.updateInviteStatus(request.getInvite());
+            }
         }
 
     }
