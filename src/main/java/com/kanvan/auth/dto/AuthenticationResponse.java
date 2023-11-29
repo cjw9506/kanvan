@@ -6,12 +6,12 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class UserLoginResponse {
+public class AuthenticationResponse {
 
-    private String Bearer;
+    private String token;
 
     @Builder
-    public UserLoginResponse(String bearer) {
-        Bearer = bearer;
+    public AuthenticationResponse(String token) {
+        this.token = token;
     }
 }
