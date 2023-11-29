@@ -3,6 +3,7 @@ package com.kanvan.team.controller;
 import com.kanvan.team.dto.MemberInviteDecideRequest;
 import com.kanvan.team.dto.MemberInviteRequest;
 import com.kanvan.team.dto.TeamCreateRequest;
+import com.kanvan.team.dto.TeamsResponse;
 import com.kanvan.team.service.TeamService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -41,6 +42,13 @@ public class TeamController {
         teamService.decide(request, inviteId, authentication);
 
         return ResponseEntity.status(HttpStatus.OK).body(null);
+    }
+
+    @GetMapping
+    public ResponseEntity<?> getTeams(Authentication authentication) {
+        TeamsResponse response = teamService.getTeams(authentication);
+
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
 

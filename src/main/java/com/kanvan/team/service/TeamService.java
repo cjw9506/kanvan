@@ -6,9 +6,7 @@ import com.kanvan.team.domain.Invite;
 import com.kanvan.team.domain.Team;
 import com.kanvan.team.domain.Member;
 import com.kanvan.team.domain.TeamRole;
-import com.kanvan.team.dto.MemberInviteDecideRequest;
-import com.kanvan.team.dto.MemberInviteRequest;
-import com.kanvan.team.dto.TeamCreateRequest;
+import com.kanvan.team.dto.*;
 import com.kanvan.team.repository.MemberRepository;
 import com.kanvan.team.repository.TeamRepository;
 import com.kanvan.user.domain.User;
@@ -17,6 +15,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -107,4 +108,21 @@ public class TeamService {
         }
 
     }
+
+    public TeamsResponse getTeams(Authentication authentication) {
+
+        User user = userRepository.findByAccount(authentication.getName()).orElseThrow(
+                () -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        List<Member> teamsOfUser = memberRepository.findByMember(user);
+
+        List<TeamResponse> response = teamsOfUser.stream()
+                .map(member -> new TeamResponse(member.getTeam().getId(), member.getTeam().getTeamName()))
+                .collect(Collectors.toList());
+
+        return TeamsResponse.builder()
+                .teams(response)
+                .build();
+    }
+
 }
