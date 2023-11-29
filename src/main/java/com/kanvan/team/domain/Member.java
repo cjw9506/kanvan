@@ -36,4 +36,8 @@ public class Member {
         this.role = role;
         this.inviteStatus = inviteStatus;
     }
+
+    public void updateInviteStatus(Invite inviteStatus) {
+        this.inviteStatus = inviteStatus;
+    }
 }

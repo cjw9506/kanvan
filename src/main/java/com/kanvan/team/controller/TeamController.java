@@ -1,5 +1,6 @@
 package com.kanvan.team.controller;
 
+import com.kanvan.team.dto.MemberInviteDecideRequest;
 import com.kanvan.team.dto.MemberInviteRequest;
 import com.kanvan.team.dto.TeamCreateRequest;
 import com.kanvan.team.service.TeamService;
@@ -8,10 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -35,5 +33,15 @@ public class TeamController {
 
         return ResponseEntity.status(HttpStatus.OK).body(null);
     }
+
+    @PatchMapping("/invite/{inviteId}")
+    public ResponseEntity<?> invite(@Valid @RequestBody MemberInviteDecideRequest request,
+                                    @PathVariable Long inviteId,
+                                    Authentication authentication) {
+        teamService.decide(request, inviteId, authentication);
+
+        return ResponseEntity.status(HttpStatus.OK).body(null);
+    }
+
 
 }
