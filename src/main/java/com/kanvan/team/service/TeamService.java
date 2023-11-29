@@ -98,7 +98,7 @@ public class TeamService {
         Member waitingMember = memberRepository.findById(inviteId).orElseThrow(
                 () -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
 
-        if (waitingMember.getMember().equals(user)) {
+        if (waitingMember.getMember().equals(user) && waitingMember.getInviteStatus() == Invite.WAITING) {
             if (request.getInvite() == Invite.REFUSE) {
                 memberRepository.delete(waitingMember);
             } else {
