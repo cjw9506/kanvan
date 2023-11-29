@@ -1,5 +1,6 @@
 package com.kanvan.team.controller;
 
+import com.kanvan.team.dto.MemberInviteRequest;
 import com.kanvan.team.dto.TeamCreateRequest;
 import com.kanvan.team.service.TeamService;
 import jakarta.validation.Valid;
@@ -25,6 +26,14 @@ public class TeamController {
         teamService.create(request, authentication);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(null);
+    }
+
+    @PostMapping("/invite")
+    public ResponseEntity<?> invite(@Valid @RequestBody MemberInviteRequest request,
+                                    Authentication authentication) {
+        teamService.invite(request, authentication);
+
+        return ResponseEntity.status(HttpStatus.OK).body(null);
     }
 
 }

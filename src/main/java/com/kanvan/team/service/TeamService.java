@@ -2,9 +2,11 @@ package com.kanvan.team.service;
 
 import com.kanvan.common.exception.CustomException;
 import com.kanvan.common.exception.ErrorCode;
+import com.kanvan.team.domain.Invite;
 import com.kanvan.team.domain.Team;
 import com.kanvan.team.domain.Member;
 import com.kanvan.team.domain.TeamRole;
+import com.kanvan.team.dto.MemberInviteRequest;
 import com.kanvan.team.dto.TeamCreateRequest;
 import com.kanvan.team.repository.MemberRepository;
 import com.kanvan.team.repository.TeamRepository;
@@ -47,5 +49,37 @@ public class TeamService {
                 .build();
 
         memberRepository.save(teamMember);
+    }
+
+    @Transactional
+    public void invite(MemberInviteRequest request, Authentication authentication) {
+
+
+        //팀이 있어야함
+        Team team = teamRepository.findById(request.getTeamId()).orElseThrow(
+                () -> new CustomException(ErrorCode.TEAM_NOT_FOUND));
+        //로그인 한 유저
+        User user = userRepository.findByAccount(authentication.getName()).orElseThrow(
+                () -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        //해당 멤버 조회
+        Member member = memberRepository.findByMemberAndTeam(user, team).orElseThrow(
+                () -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
+
+        //팀장 권한이면
+        if (member.getRole() == TeamRole.LEADER) {
+            //초대할 회원
+            User inviteUser = userRepository.findByAccount(request.getAccount()).orElseThrow(
+                    () -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+            Member waitingMember = Member.builder()
+                    .team(team)
+                    .member(inviteUser)
+                    .role(TeamRole.MEMBER)
+                    .inviteStatus(Invite.WAITING)
+                    .build();
+
+            memberRepository.save(waitingMember);
+        }
+
     }
 }
