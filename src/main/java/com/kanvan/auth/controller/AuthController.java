@@ -1,28 +1,37 @@
 package com.kanvan.auth.controller;
 
+import com.kanvan.auth.dto.UserLoginRequest;
+import com.kanvan.auth.dto.AuthenticationResponse;
 import com.kanvan.auth.dto.UserSignupRequest;
 import com.kanvan.auth.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api")
+@RequestMapping("/api/auth")
 public class AuthController {
 
     private final AuthService authService;
 
     @PostMapping("/signup")
-    public ResponseEntity<?> signup(@Valid @RequestBody UserSignupRequest request) {
+    public ResponseEntity<AuthenticationResponse> signup(@Valid @RequestBody UserSignupRequest request) {
 
-        authService.signup(request);
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(null);
+        return ResponseEntity.ok(authService.register(request));
     }
+
+    @PostMapping("/login")
+    public ResponseEntity<AuthenticationResponse> login(@Valid @RequestBody UserLoginRequest request) {
+
+        return ResponseEntity.ok(authService.authenticate(request));
+    }
+
+    @GetMapping("/test")
+    public String test() {
+        return "test";
+    }
+
 }
