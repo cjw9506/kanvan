@@ -36,7 +36,7 @@ public class TeamController {
 
     @PatchMapping("/invite/{inviteId}")
     public ResponseEntity<?> invite(@Valid @RequestBody MemberInviteDecideRequest request,
-                                    @PathVariable Long inviteId,
+                                    @PathVariable(name = "inviteId") Long inviteId,
                                     Authentication authentication) {
         teamService.decide(request, inviteId, authentication);
 
