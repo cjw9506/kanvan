@@ -8,6 +8,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 import static org.springframework.http.HttpStatus.*;
 
 @RestController
@@ -53,6 +55,13 @@ public class TeamController {
     public ResponseEntity<?> getTeam(@PathVariable(name = "teamId") Long teamId,
                                      Authentication authentication) {
         TeamDetailResponse response = teamService.getTeam(teamId, authentication);
+
+        return ResponseEntity.status(OK).body(response);
+    }
+
+    @GetMapping("/invite")
+    public ResponseEntity getInvites(Authentication authentication) {
+        List<InvitesResponse> response = teamService.getInvites(authentication);
 
         return ResponseEntity.status(OK).body(response);
     }

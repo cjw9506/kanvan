@@ -149,8 +149,19 @@ public class TeamService {
         } else {
             throw new CustomException(ErrorCode.MEMBER_NOT_FOUND);
         }
-
-
     }
 
+    public List<InvitesResponse> getInvites(Authentication authentication) {
+        User user = userRepository.findByAccount(authentication.getName()).orElseThrow(
+                () -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        List<Member> waiting = memberRepository.findByMemberAndInviteStatus(user, Invite.WAITING);
+
+        List<InvitesResponse> response = waiting.stream()
+                .map(invite -> new InvitesResponse(invite.getId(), invite.getTeam().getTeamName()))
+                .collect(Collectors.toList());
+
+        return response;
+
+    }
 }

@@ -1,5 +1,6 @@
 package com.kanvan.team.repository;
 
+import com.kanvan.team.domain.Invite;
 import com.kanvan.team.domain.Member;
 import com.kanvan.team.domain.Team;
 import com.kanvan.user.domain.User;
@@ -14,4 +15,6 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     List<Member> findByMember(User user);
 
     List<Member> findByTeam(Team team);
+
+    List<Member> findByMemberAndInviteStatus(User user, Invite status);
 }
