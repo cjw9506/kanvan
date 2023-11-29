@@ -125,4 +125,25 @@ public class TeamService {
                 .build();
     }
 
+    public TeamDetailResponse getTeam(Long teamId) {
+        //todo 유저 검증 추가 -> 다른 유저가 조회가능
+
+        Team team = teamRepository.findById(teamId).orElseThrow(
+                () -> new CustomException(ErrorCode.TEAM_NOT_FOUND));
+
+        List<Member> members = memberRepository.findByTeam(team);
+
+        List<TeamMemberResponse> response = members.stream()
+                .map(member -> new TeamMemberResponse(member.getMember().getId(),
+                        member.getRole(), member.getMember().getUsername()))
+                .collect(Collectors.toList());
+
+        return TeamDetailResponse.builder()
+                .teamId(teamId)
+                .teamName(team.getTeamName())
+                .members(response)
+                .build();
+
+    }
+
 }
