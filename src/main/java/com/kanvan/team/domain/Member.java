@@ -38,6 +38,6 @@ public class Member {
     }
 
     public void updateInviteStatus(Invite inviteStatus) {
-        this.inviteStatus = inviteStatus;
+        this.inviteStatus = inviteStatus != null ? inviteStatus : this.inviteStatus;
     }
 }
