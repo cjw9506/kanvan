@@ -6,9 +6,7 @@ import com.kanvan.team.domain.Invite;
 import com.kanvan.team.domain.Team;
 import com.kanvan.team.domain.Member;
 import com.kanvan.team.domain.TeamRole;
-import com.kanvan.team.dto.MemberInviteDecideRequest;
-import com.kanvan.team.dto.MemberInviteRequest;
-import com.kanvan.team.dto.TeamCreateRequest;
+import com.kanvan.team.dto.*;
 import com.kanvan.team.repository.MemberRepository;
 import com.kanvan.team.repository.TeamRepository;
 import com.kanvan.user.domain.User;
@@ -17,6 +15,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -105,6 +106,62 @@ public class TeamService {
                 waitingMember.updateInviteStatus(request.getInvite());
             }
         }
+
+    }
+
+    public TeamsResponse getTeams(Authentication authentication) {
+
+        User user = userRepository.findByAccount(authentication.getName()).orElseThrow(
+                () -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        List<Member> teamsOfUser = memberRepository.findByMember(user);
+
+        List<TeamResponse> response = teamsOfUser.stream()
+                .map(member -> new TeamResponse(member.getTeam().getId(), member.getTeam().getTeamName()))
+                .collect(Collectors.toList());
+
+        return TeamsResponse.builder()
+                .teams(response)
+                .build();
+    }
+
+    public TeamDetailResponse getTeam(Long teamId, Authentication authentication) {
+
+        User user = userRepository.findByAccount(authentication.getName()).orElseThrow(
+                () -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        Team team = teamRepository.findById(teamId).orElseThrow(
+                () -> new CustomException(ErrorCode.TEAM_NOT_FOUND));
+
+        List<Member> members = memberRepository.findByTeam(team);
+
+        if (members.stream().anyMatch(member -> member.getMember().equals(user))) {
+            List<TeamMemberResponse> response = members.stream()
+                    .map(member -> new TeamMemberResponse(member.getMember().getId(),
+                            member.getRole(), member.getMember().getUsername()))
+                    .collect(Collectors.toList());
+
+            return TeamDetailResponse.builder()
+                    .teamId(teamId)
+                    .teamName(team.getTeamName())
+                    .members(response)
+                    .build();
+        } else {
+            throw new CustomException(ErrorCode.MEMBER_NOT_FOUND);
+        }
+    }
+
+    public List<InvitesResponse> getInvites(Authentication authentication) {
+        User user = userRepository.findByAccount(authentication.getName()).orElseThrow(
+                () -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        List<Member> waiting = memberRepository.findByMemberAndInviteStatus(user, Invite.WAITING);
+
+        List<InvitesResponse> response = waiting.stream()
+                .map(invite -> new InvitesResponse(invite.getId(), invite.getTeam().getTeamName()))
+                .collect(Collectors.toList());
+
+        return response;
 
     }
 }
