@@ -3,8 +3,12 @@ package com.kanvan.column.domain;
 import com.kanvan.team.domain.Team;
 import jakarta.persistence.*;
 import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
+@Getter
+@NoArgsConstructor
 public class Columns {
 
     @Id
@@ -14,15 +18,16 @@ public class Columns {
     private String name;
 
     //순서
-    private int order;
+    private int columnOrder;
 
     @ManyToOne(fetch = FetchType.LAZY)
     private Team team;
 
     @Builder
-    public Columns(String name, int order, Team team) {
+    public Columns(String name, int columnOrder, Team team) {
         this.name = name;
-        this.order = order;
+        this.columnOrder = columnOrder
+        ;
         this.team = team;
     }
 }
