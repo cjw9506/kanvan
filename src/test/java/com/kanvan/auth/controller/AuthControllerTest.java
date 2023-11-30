@@ -15,6 +15,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -155,5 +156,61 @@ class AuthControllerTest {
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.token").value("testToken"));
+    }
+
+    @DisplayName("로그인 실패 - 계정 불일치")
+    @WithMockUser
+    @Test
+    void loginfail1() throws Exception {
+
+        UserLoginRequest request = UserLoginRequest.builder()
+                .account("testAccount")
+                .password("testPassword")
+                .build();
+
+        AuthenticationResponse token = AuthenticationResponse.builder()
+                .token("testToken")
+                .build();
+
+        when(authService.authenticate(any(UserLoginRequest.class)))
+                .thenThrow(new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        String json = objectMapper.writeValueAsString(request);
+
+        mockMvc.perform(post("/api/auth/login").with(csrf())
+                        .content(json)
+                        .contentType(APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.errorCode").value("U003"))
+                .andExpect(jsonPath("$.errorMessage").value("해당 계정은 존재하지 않습니다."));
+    }
+
+    @DisplayName("로그인 실패 - 비밀번호 불일치")
+    @WithMockUser
+    @Test
+    void loginfail2() throws Exception {
+
+        UserLoginRequest request = UserLoginRequest.builder()
+                .account("testAccount")
+                .password("testPassword")
+                .build();
+
+        AuthenticationResponse token = AuthenticationResponse.builder()
+                .token("testToken")
+                .build();
+
+        when(authService.authenticate(any(UserLoginRequest.class)))
+                .thenThrow(new BadCredentialsException("Bad Credentials"));
+
+        String json = objectMapper.writeValueAsString(request);
+
+        mockMvc.perform(post("/api/auth/login").with(csrf())
+                        .content(json)
+                        .contentType(APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$.errorCode").value("500 INTERNAL_SERVER_ERROR"))
+                .andExpect(jsonPath("$.errorMessage").value("Bad Credentials"));
     }
 }
