@@ -5,6 +5,8 @@ import com.kanvan.auth.dto.AuthenticationResponse;
 import com.kanvan.auth.dto.UserSignupRequest;
 import com.kanvan.auth.filter.JwtAuthenticationFilter;
 import com.kanvan.auth.service.AuthService;
+import com.kanvan.common.exception.CustomException;
+import com.kanvan.common.exception.ErrorCode;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -68,13 +70,44 @@ class AuthControllerTest {
 
     }
 
-    @DisplayName("회원가입 실패")
+    @DisplayName("회원가입 실패 - 중복 계정")
     @WithMockUser
     @Test
-    void signupfail() throws Exception {
+    void signupfail1() throws Exception {
 
         UserSignupRequest request = UserSignupRequest.builder()
                 .account("testAccount")
+                .password("testPassword")
+                .username("홍길동")
+                .build();
+
+        AuthenticationResponse token = AuthenticationResponse.builder()
+                .token("testToken")
+                .build();
+
+        when(authService.register(any(UserSignupRequest.class)))
+                .thenThrow(new CustomException(ErrorCode.USER_ALREADY_EXIST));
+
+        String json = objectMapper.writeValueAsString(request);
+
+        mockMvc.perform(post("/api/auth/signup").with(csrf())
+                        .content(json)
+                        .contentType(APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errorCode").value("U001"))
+                .andExpect(jsonPath("$.errorMessage").value("이미 계정이 존재합니다."));
+
+
+    }
+
+    @DisplayName("회원가입 실패 - validation")
+    @WithMockUser
+    @Test
+    void signupfail2() throws Exception {
+
+        UserSignupRequest request = UserSignupRequest.builder()
+                .account("test")
                 .password("testPassword")
                 .username("홍길동")
                 .build();
@@ -91,8 +124,10 @@ class AuthControllerTest {
                         .content(json)
                         .contentType(APPLICATION_JSON))
                 .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.token").value("testToken"));
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errorCode").value("400 BAD_REQUEST"))
+                .andExpect(jsonPath("$.errorMessage").value("[account] length must be between 6 and 20"));
+
 
 
     }
