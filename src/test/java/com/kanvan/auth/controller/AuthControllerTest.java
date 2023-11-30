@@ -2,6 +2,7 @@ package com.kanvan.auth.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kanvan.auth.dto.AuthenticationResponse;
+import com.kanvan.auth.dto.UserLoginRequest;
 import com.kanvan.auth.dto.UserSignupRequest;
 import com.kanvan.auth.filter.JwtAuthenticationFilter;
 import com.kanvan.auth.service.AuthService;
@@ -128,7 +129,31 @@ class AuthControllerTest {
                 .andExpect(jsonPath("$.errorCode").value("400 BAD_REQUEST"))
                 .andExpect(jsonPath("$.errorMessage").value("[account] length must be between 6 and 20"));
 
+    }
 
+    @DisplayName("로그인 성공")
+    @WithMockUser
+    @Test
+    void login() throws Exception {
 
+        UserLoginRequest request = UserLoginRequest.builder()
+                .account("testAccount")
+                .password("testPassword")
+                .build();
+
+        AuthenticationResponse token = AuthenticationResponse.builder()
+                .token("testToken")
+                .build();
+
+        when(authService.authenticate(any(UserLoginRequest.class))).thenReturn(token);
+
+        String json = objectMapper.writeValueAsString(request);
+
+        mockMvc.perform(post("/api/auth/login").with(csrf())
+                        .content(json)
+                        .contentType(APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.token").value("testToken"));
     }
 }
