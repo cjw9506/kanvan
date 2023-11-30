@@ -27,6 +27,11 @@ public class AuthService {
 
     @Transactional
     public AuthenticationResponse register(UserSignupRequest request) {
+
+        if (userRepository.findByAccount(request.getAccount()).isPresent()) {
+            throw new CustomException(ErrorCode.USER_ALREADY_EXIST);
+        }
+
         User user = User.builder()
                 .account(request.getAccount())
                 .username(request.getUsername())
