@@ -46,4 +46,15 @@ public class ColumnController {
 
         return ResponseEntity.status(HttpStatus.OK).body(null);
     }
+
+    @DeleteMapping("/{columnId}")
+    public ResponseEntity<?> deleteColumn(@PathVariable(name = "columnId") Long columnId,
+                                          @RequestBody ColumnDeleteRequest request,
+                                          Authentication authentication) {
+
+        columnService.deleteColumn(columnId, request, authentication);
+
+        return ResponseEntity.status(HttpStatus.OK).body(null);
+
+    }
 }

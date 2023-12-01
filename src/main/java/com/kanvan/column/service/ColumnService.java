@@ -2,6 +2,7 @@ package com.kanvan.column.service;
 
 import com.kanvan.column.domain.Columns;
 import com.kanvan.column.dto.ColumnCreateRequest;
+import com.kanvan.column.dto.ColumnDeleteRequest;
 import com.kanvan.column.dto.ColumnUpdateRequest;
 import com.kanvan.column.dto.ColumnsResponse;
 import com.kanvan.column.repository.ColumnRepository;
@@ -102,5 +103,28 @@ public class ColumnService {
                 column.updateColumnOrder(column.getColumnOrder() + offset);
             }
         });
+    }
+
+    @Transactional
+    public void deleteColumn(Long columnId, ColumnDeleteRequest request, Authentication authentication) {
+        User user = userRepository.findByAccount(authentication.getName()).orElseThrow(
+                () -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        Team team = teamRepository.findById(request.getTeamId()).orElseThrow(
+                () -> new CustomException(ErrorCode.TEAM_NOT_FOUND));
+
+        Member member = memberRepository.findByMemberAndTeam(user, team).orElseThrow(
+                () -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
+
+        if (member.getRole() != TeamRole.LEADER) throw new CustomException(ErrorCode.MEMBER_NOT_LEADER);
+
+        Columns columnToBeDeleted = columnRepository.findById(columnId).orElseThrow(
+                () -> new CustomException(ErrorCode.COLUMN_NOT_FOUND));
+
+        List<Columns> columns = columnRepository.findByColumnOrderGreaterThan(columnToBeDeleted.getColumnOrder());
+
+        columns.forEach(column -> column.updateColumnOrder(column.getColumnOrder() - 1));
+
+        columnRepository.delete(columnToBeDeleted);
     }
 }
