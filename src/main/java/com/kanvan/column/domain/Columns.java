@@ -26,8 +26,7 @@ public class Columns {
     @Builder
     public Columns(String name, int columnOrder, Team team) {
         this.name = name;
-        this.columnOrder = columnOrder
-        ;
+        this.columnOrder = columnOrder;
         this.team = team;
     }
 }
