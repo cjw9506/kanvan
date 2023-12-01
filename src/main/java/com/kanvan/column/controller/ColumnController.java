@@ -1,6 +1,7 @@
 package com.kanvan.column.controller;
 
 import com.kanvan.column.dto.ColumnCreateRequest;
+import com.kanvan.column.dto.ColumnDeleteRequest;
 import com.kanvan.column.dto.ColumnUpdateRequest;
 import com.kanvan.column.dto.ColumnsResponse;
 import com.kanvan.column.service.ColumnService;
@@ -39,7 +40,7 @@ public class ColumnController {
     }
 
     @PatchMapping
-    public ResponseEntity<?> updateColumnOrder(@RequestBody ColumnUpdateRequest request,
+    public ResponseEntity<?> updateColumnOrder(@Valid @RequestBody ColumnUpdateRequest request,
                                                Authentication authentication) {
         columnService.updateColumnOrder(request, authentication);
 
