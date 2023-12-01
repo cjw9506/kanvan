@@ -1,6 +1,7 @@
 package com.kanvan.column.controller;
 
 import com.kanvan.column.dto.ColumnCreateRequest;
+import com.kanvan.column.dto.ColumnUpdateRequest;
 import com.kanvan.column.dto.ColumnsResponse;
 import com.kanvan.column.service.ColumnService;
 import jakarta.validation.Valid;
@@ -37,5 +38,11 @@ public class ColumnController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
+    @PatchMapping
+    public ResponseEntity<?> updateColumnOrder(@RequestBody ColumnUpdateRequest request,
+                                               Authentication authentication) {
+        columnService.updateColumnOrder(request, authentication);
 
+        return ResponseEntity.status(HttpStatus.OK).body(null);
+    }
 }

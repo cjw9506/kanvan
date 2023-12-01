@@ -29,4 +29,8 @@ public class Columns {
         this.columnOrder = columnOrder;
         this.team = team;
     }
+
+    public void updateColumnOrder(int columnOrder) {
+        this.columnOrder = columnOrder;
+    }
 }

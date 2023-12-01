@@ -2,6 +2,7 @@ package com.kanvan.column.service;
 
 import com.kanvan.column.domain.Columns;
 import com.kanvan.column.dto.ColumnCreateRequest;
+import com.kanvan.column.dto.ColumnUpdateRequest;
 import com.kanvan.column.dto.ColumnsResponse;
 import com.kanvan.column.repository.ColumnRepository;
 import com.kanvan.common.exception.CustomException;
@@ -73,5 +74,33 @@ public class ColumnService {
         return columnList.stream()
                 .map(columns -> new ColumnsResponse(columns.getId(), columns.getName(), columns.getColumnOrder()))
                 .collect(Collectors.toList());
+    }
+
+
+    @Transactional
+    public void updateColumnOrder(ColumnUpdateRequest request, Authentication authentication) {
+        User user = userRepository.findByAccount(authentication.getName()).orElseThrow(
+                () -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        Team team = teamRepository.findById(request.getTeamId()).orElseThrow(
+                () -> new CustomException(ErrorCode.TEAM_NOT_FOUND));
+
+        Member member = memberRepository.findByMemberAndTeam(user, team).orElseThrow(
+                () -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
+
+        int min = Math.min(request.getCurrentColumnOrder(), request.getFutureColumnOrder());
+        int max = Math.max(request.getCurrentColumnOrder(), request.getFutureColumnOrder());
+
+        List<Columns> columns = columnRepository.findByColumnOrderBetween(min, max);
+
+        int offset = request.getCurrentColumnOrder() < request.getFutureColumnOrder() ? -1 : 1;
+
+        columns.forEach(column -> {
+            if (column.getColumnOrder() == request.getCurrentColumnOrder()) {
+                column.updateColumnOrder(request.getFutureColumnOrder());
+            } else {
+                column.updateColumnOrder(column.getColumnOrder() + offset);
+            }
+        });
     }
 }
