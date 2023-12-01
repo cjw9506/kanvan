@@ -38,7 +38,8 @@ public class ColumnService {
         Member member = memberRepository.findByMemberAndTeam(user, team).orElseThrow(
                 () -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
 
-        if (member.getRole().equals(TeamRole.LEADER)) throw new CustomException(ErrorCode.MEMBER_NOT_LEADER);
+        System.out.println(member.getRole());
+        if (member.getRole() != TeamRole.LEADER) throw new CustomException(ErrorCode.MEMBER_NOT_LEADER);
 
         int order = columnRepository.findByTeam(team).size() + 1;
 
