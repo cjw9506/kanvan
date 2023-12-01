@@ -2,6 +2,7 @@ package com.kanvan.column.service;
 
 import com.kanvan.column.domain.Columns;
 import com.kanvan.column.dto.ColumnCreateRequest;
+import com.kanvan.column.dto.ColumnsResponse;
 import com.kanvan.column.repository.ColumnRepository;
 import com.kanvan.common.exception.CustomException;
 import com.kanvan.common.exception.ErrorCode;
@@ -16,6 +17,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -38,7 +42,6 @@ public class ColumnService {
         Member member = memberRepository.findByMemberAndTeam(user, team).orElseThrow(
                 () -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
 
-        System.out.println(member.getRole());
         if (member.getRole() != TeamRole.LEADER) throw new CustomException(ErrorCode.MEMBER_NOT_LEADER);
 
         int order = columnRepository.findByTeam(team).size() + 1;
@@ -51,5 +54,24 @@ public class ColumnService {
 
         columnRepository.save(column);
 
+    }
+
+    public List<ColumnsResponse> getColumns(Long teamId, Authentication authentication) {
+
+        //todo 추후 티켓 추가해야함
+        User user = userRepository.findByAccount(authentication.getName()).orElseThrow(
+                () -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        Team team = teamRepository.findById(teamId).orElseThrow(
+                () -> new CustomException(ErrorCode.TEAM_NOT_FOUND));
+
+        Member member = memberRepository.findByMemberAndTeam(user, team).orElseThrow(
+                () -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
+
+        List<Columns> columnList = columnRepository.findByTeamOrderByColumnOrder(team);
+
+        return columnList.stream()
+                .map(columns -> new ColumnsResponse(columns.getId(), columns.getName(), columns.getColumnOrder()))
+                .collect(Collectors.toList());
     }
 }
