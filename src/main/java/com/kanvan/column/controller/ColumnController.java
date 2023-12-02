@@ -19,6 +19,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ColumnController {
 
+    //todo 컬럼 api restful하게 바꾸기
+
     private final ColumnService columnService;
 
     @PostMapping
