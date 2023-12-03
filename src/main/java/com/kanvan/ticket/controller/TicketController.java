@@ -53,4 +53,14 @@ public class TicketController {
         return ResponseEntity.status(HttpStatus.OK).body(null);
     }
 
+    @DeleteMapping("/{teamName}/columns/{columnId}/tickets/{ticketId}")
+    public ResponseEntity<?> delete(@PathVariable(name = "teamName") String teamName,
+                                    @PathVariable(name = "columnId") int columnId,
+                                    @PathVariable(name = "ticketId") int ticketId,
+                                    Authentication authentication) {
+        ticketService.delete(teamName, columnId, ticketId, authentication);
+
+        return ResponseEntity.status(HttpStatus.OK).body(null);
+    }
+
 }

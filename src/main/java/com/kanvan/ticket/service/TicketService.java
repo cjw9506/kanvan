@@ -155,16 +155,33 @@ public class TicketService {
                 }
             });
         }
+    }
 
+    @Transactional
+    public void delete(String teamName, int columnId, int ticketId, Authentication authentication) {
+        Ticket ticket = ticketRepository.findByTicketOrder(ticketId).orElseThrow(
+                () -> new CustomException(ErrorCode.TICKET_NOT_FOUND));
 
+        Team team = teamRepository.findByTeamName(teamName).orElseThrow(
+                () -> new CustomException(ErrorCode.TEAM_NOT_FOUND));
 
+        Columns column = columnRepository.findByTeamAndColumnOrder(team, columnId).orElseThrow(
+                () -> new CustomException(ErrorCode.COLUMN_NOT_FOUND));
 
+        //===== 권한 확인 =====//
+        User user = userRepository.findByAccount(authentication.getName()).orElseThrow(
+                () -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
+        Member member = memberRepository.findByMemberAndTeam(user, team).orElseThrow(
+                () -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
+        //===== 권한 확인 =====//
 
+        ticketRepository.delete(ticket);
 
+        List<Ticket> tickets = ticketRepository.findByColumnAndTicketOrderGreaterThan(column, ticketId);
 
-
-//        ticket.updateOrders(request.getTicketOrder(), request.getColumnId());
-
+        tickets.forEach(tk -> {
+            tk.updateTicketOrder(tk.getTicketOrder() - 1);
+                });
     }
 }
