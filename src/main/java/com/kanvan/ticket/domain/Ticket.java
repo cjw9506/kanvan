@@ -53,4 +53,12 @@ public class Ticket {
         this.deadline = deadline != null ? deadline : this.deadline;
         this.manager = manager != null ? manager : this.manager;
     }
+
+    public void updateTicketOrder(int ticketOrder) {
+        this.ticketOrder = ticketOrder;
+    }
+
+    public void updateColumn(Columns column) {
+        this.column = column != null ? column : this.column;
+    }
 }
