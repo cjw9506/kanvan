@@ -45,4 +45,12 @@ public class Ticket {
         this.manager = manager;
         this.column = column;
     }
+
+    public void update(String title, Tag tag, String workingTime, String deadline, User manager) {
+        this.title = title != null ? title : this.title;
+        this.tag = tag != null ? tag : this.tag;
+        this.workingTime = workingTime != null ? workingTime : this.workingTime;
+        this.deadline = deadline != null ? deadline : this.deadline;
+        this.manager = manager != null ? manager : this.manager;
+    }
 }

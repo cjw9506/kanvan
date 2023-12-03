@@ -10,6 +10,7 @@ import com.kanvan.team.repository.MemberRepository;
 import com.kanvan.team.repository.TeamRepository;
 import com.kanvan.ticket.domain.Ticket;
 import com.kanvan.ticket.dto.TicketCreateRequest;
+import com.kanvan.ticket.dto.TicketUpdateRequest;
 import com.kanvan.ticket.repository.TicketRepository;
 import com.kanvan.user.domain.User;
 import com.kanvan.user.repository.UserRepository;
@@ -27,12 +28,14 @@ public class TicketService {
     private final TicketRepository ticketRepository;
     private final ColumnRepository columnRepository;
     private final UserRepository userRepository;
-    private final TeamRepository teamRepository;
     private final MemberRepository memberRepository;
 
     @Transactional
     public void create(Long teamId, Long columnId, TicketCreateRequest request,
                        Authentication authentication) {
+
+        // /지원팀/columns/1/ticket
+        // 팀이름/columns/column순서/tickets/티켓순서
 
         //todo 조회 줄이기 -> if i can
 
@@ -69,5 +72,28 @@ public class TicketService {
 
         ticketRepository.save(ticket);
 
+    }
+
+    @Transactional
+    public void update(Long teamId, Long columnId, Long ticketId,
+                       TicketUpdateRequest request, Authentication authentication) {
+
+        Ticket ticket = ticketRepository.findById(ticketId).orElseThrow(
+                () -> new CustomException(ErrorCode.TICKET_NOT_FOUND));
+
+        Columns column = columnRepository.findColumnsByIdAndTeamId(teamId, columnId).orElseThrow(
+                () -> new CustomException(ErrorCode.COLUMN_NOT_FOUND));
+
+        User user = userRepository.findByAccount(authentication.getName()).orElseThrow(
+                () -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        Member member = memberRepository.findByMemberAndTeamId(user, teamId).orElseThrow(
+                () -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
+
+        User changedUser = userRepository.findByAccount(request.getMemberAccount()).orElseThrow(
+                () -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        ticket.update(request.getTitle(), request.getTag(), request.getWorkingTime(),
+                request.getDeadline(), changedUser);
     }
 }
