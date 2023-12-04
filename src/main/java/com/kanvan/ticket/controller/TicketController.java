@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,12 +20,12 @@ public class TicketController {
     private final TicketService ticketService;
 
     @PostMapping("/teams/{teamId}/columns/{columnId}/tickets")
+    @PreAuthorize("hasAnyAuthority(#teamId + '_LEADER', #teamId + '_MEMBER')")
     public ResponseEntity<?> create(@PathVariable(name = "teamId") Long teamId,
                                     @PathVariable(name = "columnId") Long columnId,
-                                    @Valid @RequestBody TicketCreateRequest request,
-                                    Authentication authentication) {
+                                    @Valid @RequestBody TicketCreateRequest request) {
 
-        ticketService.create(teamId, columnId, request, authentication);
+        ticketService.create(teamId, columnId, request);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(null);
     }
