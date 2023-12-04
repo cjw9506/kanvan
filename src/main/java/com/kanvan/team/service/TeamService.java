@@ -53,6 +53,10 @@ public class TeamService {
                 .build();
 
         memberRepository.save(teamMember);
+
+        String authority = team.getId() + "_LEADER";
+
+        user.setTeamAuthority(authority);
     }
 
     @Transactional
@@ -106,6 +110,10 @@ public class TeamService {
                 waitingMember.updateInviteStatus(request.getInvite());
             }
         }
+
+        String authority = waitingMember.getTeam().getId() + "_MEMBER";
+
+        user.setTeamAuthority(authority);
 
     }
 

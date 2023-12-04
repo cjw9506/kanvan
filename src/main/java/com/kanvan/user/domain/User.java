@@ -9,6 +9,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -29,6 +30,8 @@ public class User implements UserDetails {
     @Enumerated(EnumType.STRING)
     private Role role;
 
+    private List<String> teamAuthority = new ArrayList<>();
+
     @Builder
     public User(String account, String password, String username, Role role) {
         this.account = account;
@@ -37,9 +40,20 @@ public class User implements UserDetails {
         this.role = role;
     }
 
+    public void setTeamAuthority(String authority) {
+        teamAuthority.add(authority);
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(role.name()));
+
+        Collection<GrantedAuthority> authorities = new ArrayList<>();
+        authorities.add(new SimpleGrantedAuthority(role.name()));
+
+        for (String authority : teamAuthority) {
+            authorities.add(new SimpleGrantedAuthority(authority));
+        }
+        return authorities;
     }
 
     @Override
