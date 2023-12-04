@@ -23,6 +23,9 @@ public enum ErrorCode {
 
     //column
     COLUMN_NOT_FOUND(HttpStatus.NOT_FOUND, "C001", "해당 컬럼은 존재하지 않습니다."),
+
+    //ticket
+    TICKET_NOT_FOUND(HttpStatus.NOT_FOUND, "T001", "해당 티켓은 존재하지 않습니다."),
     ;
 
     private final HttpStatus httpStatus;
