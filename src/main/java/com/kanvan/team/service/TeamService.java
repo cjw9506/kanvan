@@ -111,6 +111,10 @@ public class TeamService {
             }
         }
 
+        String authority = waitingMember.getTeam().getId() + "_MEMBER";
+
+        user.setTeamAuthority(authority);
+
     }
 
     public TeamsResponse getTeams(Authentication authentication) {
