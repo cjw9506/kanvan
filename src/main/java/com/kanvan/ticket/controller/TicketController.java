@@ -22,10 +22,10 @@ public class TicketController {
     @PostMapping("/teams/{teamId}/columns/{columnId}/tickets")
     @PreAuthorize("hasAnyAuthority(#teamId + '_LEADER', #teamId + '_MEMBER')")
     public ResponseEntity<?> create(@PathVariable(name = "teamId") Long teamId,
-                                    @PathVariable(name = "columnId") Long columnId,
+                                    @PathVariable(name = "columnId") int columnOrder,
                                     @Valid @RequestBody TicketCreateRequest request) {
 
-        ticketService.create(teamId, columnId, request);
+        ticketService.create(teamId, columnOrder, request);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(null);
     }

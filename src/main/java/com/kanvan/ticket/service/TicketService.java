@@ -35,7 +35,7 @@ public class TicketService {
     private final TeamRepository teamRepository;
 
     @Transactional
-    public void create(Long teamId, Long columnId, TicketCreateRequest request) {
+    public void create(Long teamId, int columnId, TicketCreateRequest request) {
 
         //작업자
         User manager = userRepository.findByAccount(request.getMemberAccount()).orElseThrow(
