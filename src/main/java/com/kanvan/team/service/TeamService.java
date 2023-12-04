@@ -53,6 +53,12 @@ public class TeamService {
                 .build();
 
         memberRepository.save(teamMember);
+
+        int teamId = Long.valueOf(team.getId()).intValue();
+
+        String authority = teamId + "_" + "LEADER";
+
+        user.setTeamAuthority(authority);
     }
 
     @Transactional
