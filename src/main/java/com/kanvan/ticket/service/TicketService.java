@@ -46,7 +46,7 @@ public class TicketService {
                 () -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
 
         //컬럼
-        Columns column = columnRepository.findColumnsByIdAndTeamId(columnId, teamId).orElseThrow(
+        Columns column = columnRepository.findByColumnOrderAndTeamId(columnId, teamId).orElseThrow(
                 () -> new CustomException(ErrorCode.COLUMN_NOT_FOUND));
 
         int order =  ticketRepository.findByColumn(column).size();
