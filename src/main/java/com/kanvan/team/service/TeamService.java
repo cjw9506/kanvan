@@ -54,9 +54,7 @@ public class TeamService {
 
         memberRepository.save(teamMember);
 
-        int teamId = Long.valueOf(team.getId()).intValue();
-
-        String authority = teamId + "_" + "LEADER";
+        String authority = team.getId() + "_LEADER";
 
         user.setTeamAuthority(authority);
     }
