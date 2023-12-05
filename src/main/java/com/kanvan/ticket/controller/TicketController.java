@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,46 +20,46 @@ public class TicketController {
     private final TicketService ticketService;
 
     @PostMapping("/teams/{teamId}/columns/{columnId}/tickets")
+    @PreAuthorize("hasAnyAuthority(#teamId + '_LEADER', #teamId + '_MEMBER')")
     public ResponseEntity<?> create(@PathVariable(name = "teamId") Long teamId,
-                                    @PathVariable(name = "columnId") Long columnId,
-                                    @Valid @RequestBody TicketCreateRequest request,
-                                    Authentication authentication) {
+                                    @PathVariable(name = "columnId") int columnOrder,
+                                    @Valid @RequestBody TicketCreateRequest request) {
 
-        ticketService.create(teamId, columnId, request, authentication);
+        ticketService.create(teamId, columnOrder, request);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(null);
     }
 
     @PatchMapping("/teams/{teamId}/columns/{columnId}/tickets/{ticketId}")
+    @PreAuthorize("hasAnyAuthority(#teamId + '_LEADER', #teamId + '_MEMBER')")
     public ResponseEntity<?> updateFields(@PathVariable(name = "teamId") Long teamId,
-                                    @PathVariable(name = "columnId") Long columnId,
-                                    @PathVariable(name = "ticketId") Long ticketId,
-                                    @Valid @RequestBody TicketUpdateRequest request,
-                                    Authentication authentication) {
+                                    @PathVariable(name = "columnId") int columnOrder,
+                                    @PathVariable(name = "ticketId") int ticketOrder,
+                                    @Valid @RequestBody TicketUpdateRequest request) {
 
-        ticketService.update(teamId, columnId, ticketId, request, authentication);
-
-        return ResponseEntity.status(HttpStatus.OK).body(null);
-    }
-
-    @PatchMapping("/{teamName}/columns/{columnId}/tickets/{ticketId}/order")
-    public ResponseEntity<?> updateOrders(@PathVariable(name = "teamName") String teamName,
-                                          @PathVariable(name = "columnId") int columnId,
-                                          @PathVariable(name = "ticketId") int ticketId,
-                                          @Valid @RequestBody TicketOrderUpdateRequest request,
-                                          Authentication authentication) {
-
-        ticketService.updateOrders(teamName, columnId, ticketId, request, authentication);
+        ticketService.update(teamId, columnOrder, ticketOrder, request);
 
         return ResponseEntity.status(HttpStatus.OK).body(null);
     }
 
-    @DeleteMapping("/{teamName}/columns/{columnId}/tickets/{ticketId}")
-    public ResponseEntity<?> delete(@PathVariable(name = "teamName") String teamName,
-                                    @PathVariable(name = "columnId") int columnId,
-                                    @PathVariable(name = "ticketId") int ticketId,
-                                    Authentication authentication) {
-        ticketService.delete(teamName, columnId, ticketId, authentication);
+    @PatchMapping("/teams/{teamId}/columns/{columnId}/tickets/{ticketId}/order")
+    @PreAuthorize("hasAnyAuthority(#teamId + '_LEADER', #teamId + '_MEMBER')")
+    public ResponseEntity<?> updateOrders(@PathVariable(name = "teamId") Long teamId,
+                                          @PathVariable(name = "columnId") int columnOrder,
+                                          @PathVariable(name = "ticketId") int ticketOrder,
+                                          @Valid @RequestBody TicketOrderUpdateRequest request) {
+
+        ticketService.updateOrders(teamId, columnOrder, ticketOrder, request);
+
+        return ResponseEntity.status(HttpStatus.OK).body(null);
+    }
+
+    @DeleteMapping("/teams/{teamId}/columns/{columnId}/tickets/{ticketId}")
+    @PreAuthorize("hasAnyAuthority(#teamId + '_LEADER', #teamId + '_MEMBER')")
+    public ResponseEntity<?> delete(@PathVariable(name = "teamId") Long teamId,
+                                    @PathVariable(name = "columnId") int columnOrder,
+                                    @PathVariable(name = "ticketId") int ticketOrder) {
+        ticketService.delete(teamId, columnOrder, ticketOrder);
 
         return ResponseEntity.status(HttpStatus.OK).body(null);
     }
