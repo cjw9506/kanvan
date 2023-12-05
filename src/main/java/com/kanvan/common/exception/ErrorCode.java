@@ -20,6 +20,7 @@ public enum ErrorCode {
     //member
     MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "M001", "해당 멤버는 존재하지 않습니다."),
     MEMBER_NOT_LEADER(HttpStatus.BAD_REQUEST, "M002", "해당 멤버는 리더가 아닙니다."),
+    MEMBER_ALREADY_EXIST(HttpStatus.BAD_REQUEST, "M003", "해당 멤버는 이미 초대되어 있습니다."),
 
     //column
     COLUMN_NOT_FOUND(HttpStatus.NOT_FOUND, "C001", "해당 컬럼은 존재하지 않습니다."),

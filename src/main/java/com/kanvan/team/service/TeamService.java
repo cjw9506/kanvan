@@ -60,39 +60,32 @@ public class TeamService {
     }
 
     @Transactional
-    public void invite(MemberInviteRequest request, Authentication authentication) {
+    public void invite(Long teamId, MemberInviteRequest request) {
 
-        //팀이 있어야함 -> request로 안 받아오면 여러팀이 나올 수 있음
-        Team team = teamRepository.findById(request.getTeamId()).orElseThrow(
+        Team team = teamRepository.findById(teamId).orElseThrow(
                 () -> new CustomException(ErrorCode.TEAM_NOT_FOUND));
-        //로그인 한 유저
-        User user = userRepository.findByAccount(authentication.getName()).orElseThrow(
+
+        User userToInvite = userRepository.findByAccount(request.getAccount()).orElseThrow(
                 () -> new CustomException(ErrorCode.USER_NOT_FOUND));
-        //해당 멤버 조회
-        Member member = memberRepository.findByMemberAndTeam(user, team).orElseThrow(
-                () -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
 
-        //팀장 권한이면
-        if (member.getRole() == TeamRole.LEADER) {
-            //초대할 회원
-            User inviteUser = userRepository.findByAccount(request.getAccount()).orElseThrow(
-                    () -> new CustomException(ErrorCode.USER_NOT_FOUND));
-
-            Member waitingMember = Member.builder()
-                    .team(team)
-                    .member(inviteUser)
-                    .role(TeamRole.MEMBER)
-                    .inviteStatus(Invite.WAITING)
-                    .build();
-
-            memberRepository.save(waitingMember);
+        // 이미 초대되어 있는가?
+        if (memberRepository.findByMemberAndTeamId(userToInvite, teamId).isPresent()) {
+            throw new CustomException(ErrorCode.MEMBER_ALREADY_EXIST);
         }
+
+        Member waitingMember = Member.builder()
+                .team(team)
+                .member(userToInvite)
+                .role(TeamRole.MEMBER)
+                .inviteStatus(Invite.WAITING)
+                .build();
+
+        memberRepository.save(waitingMember);
 
     }
 
     @Transactional
-    public void decide(MemberInviteDecideRequest request,
-                       Long inviteId,
+    public void decide(MemberInviteDecideRequest request, Long inviteId,
                        Authentication authentication) {
 
         //수락할 유저
@@ -108,13 +101,12 @@ public class TeamService {
                 memberRepository.delete(waitingMember);
             } else {
                 waitingMember.updateInviteStatus(request.getInvite());
+
+                String authority = waitingMember.getTeam().getId() + "_MEMBER";
+
+                user.setTeamAuthority(authority);
             }
         }
-
-        String authority = waitingMember.getTeam().getId() + "_MEMBER";
-
-        user.setTeamAuthority(authority);
-
     }
 
     public TeamsResponse getTeams(Authentication authentication) {
@@ -133,30 +125,23 @@ public class TeamService {
                 .build();
     }
 
-    public TeamDetailResponse getTeam(Long teamId, Authentication authentication) {
-
-        User user = userRepository.findByAccount(authentication.getName()).orElseThrow(
-                () -> new CustomException(ErrorCode.USER_NOT_FOUND));
+    public TeamDetailResponse getTeam(Long teamId) {
 
         Team team = teamRepository.findById(teamId).orElseThrow(
                 () -> new CustomException(ErrorCode.TEAM_NOT_FOUND));
 
         List<Member> members = memberRepository.findByTeam(team);
 
-        if (members.stream().anyMatch(member -> member.getMember().equals(user))) {
-            List<TeamMemberResponse> response = members.stream()
-                    .map(member -> new TeamMemberResponse(member.getMember().getId(),
-                            member.getRole(), member.getMember().getUsername()))
-                    .collect(Collectors.toList());
+        List<TeamMemberResponse> response = members.stream()
+                .map(member -> new TeamMemberResponse(member.getMember().getId(),
+                        member.getRole(), member.getMember().getUsername()))
+                .collect(Collectors.toList());
 
-            return TeamDetailResponse.builder()
-                    .teamId(teamId)
-                    .teamName(team.getTeamName())
-                    .members(response)
-                    .build();
-        } else {
-            throw new CustomException(ErrorCode.MEMBER_NOT_FOUND);
-        }
+        return TeamDetailResponse.builder()
+                .teamId(teamId)
+                .teamName(team.getTeamName())
+                .members(response)
+                .build();
     }
 
     public List<InvitesResponse> getInvites(Authentication authentication) {
