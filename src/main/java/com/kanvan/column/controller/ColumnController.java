@@ -49,6 +49,7 @@ public class ColumnController {
     }
 
     @PatchMapping("/teams/{teamId}/columns/{columnId}/order")
+    @PreAuthorize("hasAnyAuthority(#teamId + '_LEADER', #teamId + '_MEMBER')")
     public ResponseEntity<?> updateColumnOrder(@PathVariable(name = "teamId") Long teamId,
                                                @PathVariable(name = "columnId") int columnOrder,
                                                @Valid @RequestBody ColumnUpdateRequest request) {
