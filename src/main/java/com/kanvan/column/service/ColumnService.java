@@ -1,10 +1,7 @@
 package com.kanvan.column.service;
 
 import com.kanvan.column.domain.Columns;
-import com.kanvan.column.dto.ColumnCreateRequest;
-import com.kanvan.column.dto.ColumnDeleteRequest;
-import com.kanvan.column.dto.ColumnUpdateRequest;
-import com.kanvan.column.dto.ColumnsResponse;
+import com.kanvan.column.dto.*;
 import com.kanvan.column.repository.ColumnRepository;
 import com.kanvan.common.exception.CustomException;
 import com.kanvan.common.exception.ErrorCode;
@@ -13,6 +10,7 @@ import com.kanvan.team.domain.Team;
 import com.kanvan.team.domain.TeamRole;
 import com.kanvan.team.repository.MemberRepository;
 import com.kanvan.team.repository.TeamRepository;
+import com.kanvan.ticket.repository.TicketRepository;
 import com.kanvan.user.domain.User;
 import com.kanvan.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +29,7 @@ public class ColumnService {
     private final UserRepository userRepository;
     private final TeamRepository teamRepository;
     private final MemberRepository memberRepository;
+    private final TicketRepository ticketRepository;
 
     @Transactional
     public void create(Long teamId, ColumnCreateRequest request) {
@@ -50,22 +49,23 @@ public class ColumnService {
 
     }
 
-    public List<ColumnsResponse> getColumns(Long teamId, Authentication authentication) {
-
-        //todo 추후 티켓 추가해야함
-        User user = userRepository.findByAccount(authentication.getName()).orElseThrow(
-                () -> new CustomException(ErrorCode.USER_NOT_FOUND));
+    public List<ColumnsResponse> getColumns(Long teamId) {
 
         Team team = teamRepository.findById(teamId).orElseThrow(
                 () -> new CustomException(ErrorCode.TEAM_NOT_FOUND));
 
-        Member member = memberRepository.findByMemberAndTeam(user, team).orElseThrow(
-                () -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
+        List<Columns> columns = columnRepository.findByTeamOrderByColumnOrder(team);
 
-        List<Columns> columnList = columnRepository.findByTeamOrderByColumnOrder(team);
-
-        return columnList.stream()
-                .map(columns -> new ColumnsResponse(columns.getId(), columns.getName(), columns.getColumnOrder()))
+        return columns.stream()
+                .map(column -> {
+                    List<TicketResponse> tickets = ticketRepository.findByColumn(column).stream()
+                            .map(ticket -> new TicketResponse(ticket.getTicketOrder(),
+                                    ticket.getTitle(), ticket.getTag(), ticket.getWorkingTime(),
+                                    ticket.getDeadline(), ticket.getManager().getUsername()))
+                            .collect(Collectors.toList());
+                    return new ColumnsResponse(column.getId(), column.getName(), column.getColumnOrder(),
+                            tickets);
+                })
                 .collect(Collectors.toList());
     }
 

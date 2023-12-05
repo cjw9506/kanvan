@@ -20,8 +20,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ColumnController {
 
-    //todo 컬럼 api restful하게 바꾸기
-
     private final ColumnService columnService;
 
     @PostMapping("/teams/{teamId}/columns")
@@ -34,11 +32,11 @@ public class ColumnController {
         return ResponseEntity.status(HttpStatus.CREATED).body(null);
     }
 
-    @GetMapping("/{teamId}")
-    public ResponseEntity<?> getColumns(@PathVariable(name = "teamId") Long teamId,
-                                        Authentication authentication) {
+    @GetMapping("/teams/{teamId}/columns")
+    @PreAuthorize("hasAnyAuthority(#teamId + '_LEADER', #teamId + '_MEMBER')")
+    public ResponseEntity<?> getColumns(@PathVariable(name = "teamId") Long teamId) {
 
-        List<ColumnsResponse> response = columnService.getColumns(teamId, authentication);
+        List<ColumnsResponse> response = columnService.getColumns(teamId);
 
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
