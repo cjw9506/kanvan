@@ -3,7 +3,7 @@ package com.kanvan.column.dto;
 import lombok.Getter;
 
 @Getter
-public class ColumnCreateRequest {
+public class ColumnUpdateNameRequest {
 
     private String name;
 }

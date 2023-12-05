@@ -5,9 +5,7 @@ import com.kanvan.column.repository.ColumnRepository;
 import com.kanvan.common.exception.CustomException;
 import com.kanvan.common.exception.ErrorCode;
 import com.kanvan.team.domain.Member;
-import com.kanvan.team.domain.Team;
 import com.kanvan.team.repository.MemberRepository;
-import com.kanvan.team.repository.TeamRepository;
 import com.kanvan.ticket.domain.Ticket;
 import com.kanvan.ticket.dto.TicketCreateRequest;
 import com.kanvan.ticket.dto.TicketOrderUpdateRequest;
@@ -16,7 +14,6 @@ import com.kanvan.ticket.repository.TicketRepository;
 import com.kanvan.user.domain.User;
 import com.kanvan.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -32,7 +29,6 @@ public class TicketService {
     private final ColumnRepository columnRepository;
     private final UserRepository userRepository;
     private final MemberRepository memberRepository;
-    private final TeamRepository teamRepository;
 
     @Transactional
     public void create(Long teamId, int columnId, TicketCreateRequest request) {
@@ -46,7 +42,7 @@ public class TicketService {
                 () -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
 
         //컬럼
-        Columns column = columnRepository.findByColumnOrderAndTeamId(columnId, teamId).orElseThrow(
+        Columns column = columnRepository.findByTeamIdAndColumnOrder(teamId, columnId).orElseThrow(
                 () -> new CustomException(ErrorCode.COLUMN_NOT_FOUND));
 
         int order =  ticketRepository.findByColumn(column).size();
