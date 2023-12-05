@@ -61,7 +61,7 @@ public class TeamController {
         return ResponseEntity.status(OK).body(response);
     }
 
-    @GetMapping("/invite")
+    @GetMapping("/invites")
     public ResponseEntity getInvites(Authentication authentication) {
         List<InvitesResponse> response = teamService.getInvites(authentication);
 
