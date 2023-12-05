@@ -1,9 +1,6 @@
 package com.kanvan.column.controller;
 
-import com.kanvan.column.dto.ColumnCreateRequest;
-import com.kanvan.column.dto.ColumnDeleteRequest;
-import com.kanvan.column.dto.ColumnUpdateRequest;
-import com.kanvan.column.dto.ColumnsResponse;
+import com.kanvan.column.dto.*;
 import com.kanvan.column.service.ColumnService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -39,6 +36,16 @@ public class ColumnController {
         List<ColumnsResponse> response = columnService.getColumns(teamId);
 
         return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @PatchMapping("/teams/{teamId}/columns/{columnId}")
+    @PreAuthorize("hasAnyAuthority(#teamId + '_LEADER', #teamId + '_MEMBER')")
+    public ResponseEntity<?> updateColumnName(@PathVariable(name = "teamId") Long teamId,
+                                              @PathVariable(name = "columnId") int columnOrder,
+                                              @Valid @RequestBody ColumnUpdateNameRequest request) {
+        columnService.updateColumnName(teamId, columnOrder, request);
+
+        return ResponseEntity.status(HttpStatus.OK).body(null);
     }
 
     @PatchMapping

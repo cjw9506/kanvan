@@ -33,4 +33,8 @@ public class Columns {
     public void updateColumnOrder(int columnOrder) {
         this.columnOrder = columnOrder;
     }
+
+    public void updateColumnName(String name) {
+        this.name = name != null ? name : this.name;
+    }
 }

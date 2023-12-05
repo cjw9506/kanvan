@@ -69,6 +69,15 @@ public class ColumnService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
+    public void updateColumnName(Long teamId, int columnOrder, ColumnUpdateNameRequest request) {
+
+        Columns column = columnRepository.findByTeamIdAndColumnOrder(teamId, columnOrder).orElseThrow(
+                () -> new CustomException(ErrorCode.COLUMN_NOT_FOUND));
+
+        column.updateColumnName(request.getName());
+    }
+
 
     @Transactional
     public void updateColumnOrder(ColumnUpdateRequest request, Authentication authentication) {
@@ -119,4 +128,6 @@ public class ColumnService {
 
         columnRepository.delete(columnToBeDeleted);
     }
+
+
 }
