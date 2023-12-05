@@ -9,13 +9,14 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/columns")
+@RequestMapping("/api")
 @RequiredArgsConstructor
 public class ColumnController {
 
@@ -23,11 +24,12 @@ public class ColumnController {
 
     private final ColumnService columnService;
 
-    @PostMapping
-    public ResponseEntity<?> create(@Valid @RequestBody ColumnCreateRequest request,
-                                    Authentication authentication) {
+    @PostMapping("/teams/{teamId}/columns")
+    @PreAuthorize("hasAuthority(#teamId + '_LEADER')")
+    public ResponseEntity<?> create(@PathVariable(name = "teamId") Long teamId,
+                                    @Valid @RequestBody ColumnCreateRequest request) {
 
-        columnService.create(request, authentication);
+        columnService.create(teamId, request);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(null);
     }

@@ -33,18 +33,10 @@ public class ColumnService {
     private final MemberRepository memberRepository;
 
     @Transactional
-    public void create(ColumnCreateRequest request, Authentication authentication) {
+    public void create(Long teamId, ColumnCreateRequest request) {
 
-        User user = userRepository.findByAccount(authentication.getName()).orElseThrow(
-                () -> new CustomException(ErrorCode.USER_NOT_FOUND));
-
-        Team team = teamRepository.findById(request.getTeamId()).orElseThrow(
+        Team team = teamRepository.findById(teamId).orElseThrow(
                 () -> new CustomException(ErrorCode.TEAM_NOT_FOUND));
-
-        Member member = memberRepository.findByMemberAndTeam(user, team).orElseThrow(
-                () -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
-
-        if (member.getRole() != TeamRole.LEADER) throw new CustomException(ErrorCode.MEMBER_NOT_LEADER);
 
         int order = columnRepository.findByTeam(team).size() + 1;
 

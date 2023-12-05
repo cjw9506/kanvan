@@ -5,6 +5,5 @@ import lombok.Getter;
 @Getter
 public class ColumnCreateRequest {
 
-    private Long teamId;
     private String name;
 }
