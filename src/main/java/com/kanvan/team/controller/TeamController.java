@@ -14,7 +14,7 @@ import static org.springframework.http.HttpStatus.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/team")
+@RequestMapping("/api/teams")
 public class TeamController {
 
     private final TeamService teamService;
