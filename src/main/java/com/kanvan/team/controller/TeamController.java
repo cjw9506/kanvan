@@ -5,6 +5,7 @@ import com.kanvan.team.service.TeamService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,10 +28,11 @@ public class TeamController {
         return ResponseEntity.status(CREATED).body(null);
     }
 
-    @PostMapping("/invite")
-    public ResponseEntity<?> invite(@Valid @RequestBody MemberInviteRequest request,
-                                    Authentication authentication) {
-        teamService.invite(request, authentication);
+    @PostMapping("/{teamId}/invites")
+    @PreAuthorize("hasAuthority(#teamId + '_LEADER')")
+    public ResponseEntity<?> invite(@PathVariable(name = "teamId") Long teamId,
+                                    @Valid @RequestBody MemberInviteRequest request) {
+        teamService.invite(teamId, request);
 
         return ResponseEntity.status(OK).body(null);
     }

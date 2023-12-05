@@ -60,33 +60,26 @@ public class TeamService {
     }
 
     @Transactional
-    public void invite(MemberInviteRequest request, Authentication authentication) {
+    public void invite(Long teamId, MemberInviteRequest request) {
 
-        //팀이 있어야함 -> request로 안 받아오면 여러팀이 나올 수 있음
-        Team team = teamRepository.findById(request.getTeamId()).orElseThrow(
+        Team team = teamRepository.findById(teamId).orElseThrow(
                 () -> new CustomException(ErrorCode.TEAM_NOT_FOUND));
-        //로그인 한 유저
-        User user = userRepository.findByAccount(authentication.getName()).orElseThrow(
+
+        User userToInvite = userRepository.findByAccount(request.getAccount()).orElseThrow(
                 () -> new CustomException(ErrorCode.USER_NOT_FOUND));
-        //해당 멤버 조회
-        Member member = memberRepository.findByMemberAndTeam(user, team).orElseThrow(
-                () -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
 
-        //팀장 권한이면
-        if (member.getRole() == TeamRole.LEADER) {
-            //초대할 회원
-            User inviteUser = userRepository.findByAccount(request.getAccount()).orElseThrow(
-                    () -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        // 이미 초대되어 있는가?
+        memberRepository.findByMemberAndTeamId(userToInvite, teamId).orElseThrow(
+                () -> new CustomException(ErrorCode.MEMBER_ALREADY_EXIST));
 
-            Member waitingMember = Member.builder()
-                    .team(team)
-                    .member(inviteUser)
-                    .role(TeamRole.MEMBER)
-                    .inviteStatus(Invite.WAITING)
-                    .build();
+        Member waitingMember = Member.builder()
+                .team(team)
+                .member(userToInvite)
+                .role(TeamRole.MEMBER)
+                .inviteStatus(Invite.WAITING)
+                .build();
 
-            memberRepository.save(waitingMember);
-        }
+        memberRepository.save(waitingMember);
 
     }
 
