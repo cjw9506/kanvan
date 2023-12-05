@@ -23,6 +23,7 @@ public enum ErrorCode {
 
     //column
     COLUMN_NOT_FOUND(HttpStatus.NOT_FOUND, "C001", "해당 컬럼은 존재하지 않습니다."),
+    COLUMN_NOT_EMPTY(HttpStatus.NOT_FOUND, "C002", "해당 컬럼은 내부에 티켓이 존재합니다."),
 
     //ticket
     TICKET_NOT_FOUND(HttpStatus.NOT_FOUND, "T001", "해당 티켓은 존재하지 않습니다."),
