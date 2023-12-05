@@ -103,7 +103,6 @@ public class TicketService {
             List<Ticket> tickets = ticketRepository.findByColumnAndTicketOrderGreaterThan(column, ticketId);
 
             tickets.forEach(tk -> {
-                System.out.println(tk.getTitle());
                 tk.updateTicketOrder(tk.getTicketOrder() - 1);
             });
             List<Ticket> changedColumnTickets = ticketRepository.findByColumnAndTicketOrderGreaterThan(changedColumn, request.getTicketOrder() - 1);
