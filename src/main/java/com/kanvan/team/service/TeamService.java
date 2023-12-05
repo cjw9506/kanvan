@@ -69,8 +69,9 @@ public class TeamService {
                 () -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         // 이미 초대되어 있는가?
-        memberRepository.findByMemberAndTeamId(userToInvite, teamId).orElseThrow(
-                () -> new CustomException(ErrorCode.MEMBER_ALREADY_EXIST));
+        if (memberRepository.findByMemberAndTeamId(userToInvite, teamId).isPresent()) {
+            throw new CustomException(ErrorCode.MEMBER_ALREADY_EXIST);
+        }
 
         Member waitingMember = Member.builder()
                 .team(team)
@@ -84,8 +85,7 @@ public class TeamService {
     }
 
     @Transactional
-    public void decide(MemberInviteDecideRequest request,
-                       Long inviteId,
+    public void decide(MemberInviteDecideRequest request, Long inviteId,
                        Authentication authentication) {
 
         //수락할 유저
@@ -101,13 +101,12 @@ public class TeamService {
                 memberRepository.delete(waitingMember);
             } else {
                 waitingMember.updateInviteStatus(request.getInvite());
+
+                String authority = waitingMember.getTeam().getId() + "_MEMBER";
+
+                user.setTeamAuthority(authority);
             }
         }
-
-        String authority = waitingMember.getTeam().getId() + "_MEMBER";
-
-        user.setTeamAuthority(authority);
-
     }
 
     public TeamsResponse getTeams(Authentication authentication) {
