@@ -19,7 +19,6 @@ public interface ColumnRepository extends JpaRepository<Columns, Long> {
 
     Optional<Columns> findByColumnOrderAndTeamId(int columnOrder, Long teamId);
 
-    Optional<Columns> findByTeamAndColumnOrder(Team team, int columnOrder);
 
     Optional<Columns> findByTeamIdAndColumnOrder(Long teamId, int columnOrder);
 

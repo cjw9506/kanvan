@@ -11,8 +11,6 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
 
     List<Ticket> findByColumn(Columns column);
 
-    Optional<Ticket> findByTicketOrder(int ticketOrder);
-
     List<Ticket> findByTicketOrderBetween(int min, int max);
 
     List<Ticket> findByColumnAndTicketOrderGreaterThan(Columns column, int ticketOrder);
