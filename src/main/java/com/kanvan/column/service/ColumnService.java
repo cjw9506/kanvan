@@ -18,6 +18,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -80,30 +81,39 @@ public class ColumnService {
 
 
     @Transactional
-    public void updateColumnOrder(ColumnUpdateRequest request, Authentication authentication) {
-        User user = userRepository.findByAccount(authentication.getName()).orElseThrow(
-                () -> new CustomException(ErrorCode.USER_NOT_FOUND));
+    public void updateColumnOrder(Long teamId, int columnOrder, ColumnUpdateRequest request) {
 
-        Team team = teamRepository.findById(request.getTeamId()).orElseThrow(
-                () -> new CustomException(ErrorCode.TEAM_NOT_FOUND));
+        Columns column = columnRepository.findByTeamIdAndColumnOrder(teamId, columnOrder).orElseThrow(
+                () -> new CustomException(ErrorCode.COLUMN_NOT_FOUND));
 
-        Member member = memberRepository.findByMemberAndTeam(user, team).orElseThrow(
-                () -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
-
-        int min = Math.min(request.getCurrentColumnOrder(), request.getFutureColumnOrder());
-        int max = Math.max(request.getCurrentColumnOrder(), request.getFutureColumnOrder());
+        int min = Math.min(column.getColumnOrder(), request.getColumnOrder());
+        int max = Math.max(column.getColumnOrder(), request.getColumnOrder());
 
         List<Columns> columns = columnRepository.findByColumnOrderBetween(min, max);
 
-        int offset = request.getCurrentColumnOrder() < request.getFutureColumnOrder() ? -1 : 1;
+        int offset = column.getColumnOrder() < request.getColumnOrder() ? -1 : 1;
 
-        columns.forEach(column -> {
-            if (column.getColumnOrder() == request.getCurrentColumnOrder()) {
-                column.updateColumnOrder(request.getFutureColumnOrder());
-            } else {
-                column.updateColumnOrder(column.getColumnOrder() + offset);
-            }
-        });
+        if (offset == 1) {
+            columns.forEach(col -> {
+                if (col.getColumnOrder() == column.getColumnOrder()) {
+                    col.updateColumnOrder(request.getColumnOrder());
+                } else {
+                    col.updateColumnOrder(col.getColumnOrder() + offset);
+                }
+            });
+
+        } else {
+            Collections.reverse(columns);
+            columns.forEach(col -> {
+                if (col.getColumnOrder() == column.getColumnOrder()) {
+                    col.updateColumnOrder(request.getColumnOrder());
+                } else {
+                    col.updateColumnOrder(col.getColumnOrder() + offset);
+                }
+            });
+        }
+
+
     }
 
     @Transactional

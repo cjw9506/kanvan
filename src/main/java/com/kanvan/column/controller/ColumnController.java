@@ -48,10 +48,11 @@ public class ColumnController {
         return ResponseEntity.status(HttpStatus.OK).body(null);
     }
 
-    @PatchMapping
-    public ResponseEntity<?> updateColumnOrder(@Valid @RequestBody ColumnUpdateRequest request,
-                                               Authentication authentication) {
-        columnService.updateColumnOrder(request, authentication);
+    @PatchMapping("/teams/{teamId}/columns/{columnId}/order")
+    public ResponseEntity<?> updateColumnOrder(@PathVariable(name = "teamId") Long teamId,
+                                               @PathVariable(name = "columnId") int columnOrder,
+                                               @Valid @RequestBody ColumnUpdateRequest request) {
+        columnService.updateColumnOrder(teamId, columnOrder, request);
 
         return ResponseEntity.status(HttpStatus.OK).body(null);
     }

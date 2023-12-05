@@ -1,14 +1,11 @@
 package com.kanvan.column.dto;
 
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Min;
 import lombok.Getter;
 
 @Getter
 public class ColumnUpdateRequest {
 
-    @NotNull(message = "팀 id는 필수입니다.")
-    private Long teamId;
-
-    private int currentColumnOrder;
-    private int futureColumnOrder;
+    @Min(value = 1, message = "변경할 순서는 필수입니다.")
+    private int columnOrder;
 }
