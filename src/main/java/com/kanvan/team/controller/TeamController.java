@@ -15,12 +15,12 @@ import static org.springframework.http.HttpStatus.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/teams")
+@RequestMapping("/api")
 public class TeamController {
 
     private final TeamService teamService;
 
-    @PostMapping
+    @PostMapping("/teams")
     public ResponseEntity<?> create(@Valid @RequestBody TeamCreateRequest request,
                                     Authentication authentication) {
         teamService.create(request, authentication);
@@ -28,7 +28,7 @@ public class TeamController {
         return ResponseEntity.status(CREATED).body(null);
     }
 
-    @PostMapping("/{teamId}/invites")
+    @PostMapping("/teams/{teamId}/invites")
     @PreAuthorize("hasAuthority(#teamId + '_LEADER')")
     public ResponseEntity<?> invite(@PathVariable(name = "teamId") Long teamId,
                                     @Valid @RequestBody MemberInviteRequest request) {
@@ -37,7 +37,7 @@ public class TeamController {
         return ResponseEntity.status(OK).body(null);
     }
 
-    @PatchMapping("/invite/{inviteId}")
+    @PatchMapping("/invites/{inviteId}")
     public ResponseEntity<?> decide(@Valid @RequestBody MemberInviteDecideRequest request,
                                     @PathVariable(name = "inviteId") Long inviteId,
                                     Authentication authentication) {
