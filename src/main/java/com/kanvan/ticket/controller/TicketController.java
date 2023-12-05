@@ -42,14 +42,14 @@ public class TicketController {
         return ResponseEntity.status(HttpStatus.OK).body(null);
     }
 
-    @PatchMapping("/{teamName}/columns/{columnId}/tickets/{ticketId}/order")
-    public ResponseEntity<?> updateOrders(@PathVariable(name = "teamName") String teamName,
-                                          @PathVariable(name = "columnId") int columnId,
-                                          @PathVariable(name = "ticketId") int ticketId,
-                                          @Valid @RequestBody TicketOrderUpdateRequest request,
-                                          Authentication authentication) {
+    @PatchMapping("/teams/{teamId}/columns/{columnId}/tickets/{ticketId}/order")
+    @PreAuthorize("hasAnyAuthority(#teamId + '_LEADER', #teamId + '_MEMBER')")
+    public ResponseEntity<?> updateOrders(@PathVariable(name = "teamId") Long teamId,
+                                          @PathVariable(name = "columnId") int columnOrder,
+                                          @PathVariable(name = "ticketId") int ticketOrder,
+                                          @Valid @RequestBody TicketOrderUpdateRequest request) {
 
-        ticketService.updateOrders(teamName, columnId, ticketId, request, authentication);
+        ticketService.updateOrders(teamId, columnOrder, ticketOrder, request);
 
         return ResponseEntity.status(HttpStatus.OK).body(null);
     }

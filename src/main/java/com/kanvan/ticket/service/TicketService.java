@@ -87,28 +87,16 @@ public class TicketService {
     }
 
     @Transactional
-    public void updateOrders(String teamName, int columnId, int ticketId,
-                             TicketOrderUpdateRequest request, Authentication authentication) {
+    public void updateOrders(Long teamId, int columnId, int ticketId, TicketOrderUpdateRequest request) {
 
-        Ticket ticket = ticketRepository.findByTicketOrder(ticketId).orElseThrow(
+        Columns column = columnRepository.findByTeamIdAndColumnOrder(teamId, columnId).orElseThrow(
+                () -> new CustomException(ErrorCode.COLUMN_NOT_FOUND));
+
+        Ticket ticket = ticketRepository.findByTicketOrderAndColumnId(ticketId, column.getId()).orElseThrow(
                 () -> new CustomException(ErrorCode.TICKET_NOT_FOUND));
 
-        Team team = teamRepository.findByTeamName(teamName).orElseThrow(
-                () -> new CustomException(ErrorCode.TEAM_NOT_FOUND));
-
-        Columns column = columnRepository.findByTeamAndColumnOrder(team, columnId).orElseThrow(
+        Columns changedColumn = columnRepository.findByTeamIdAndColumnOrder(teamId, request.getColumnId()).orElseThrow(
                 () -> new CustomException(ErrorCode.COLUMN_NOT_FOUND));
-
-        Columns changedColumn = columnRepository.findByTeamAndColumnOrder(team, request.getColumnId()).orElseThrow(
-                () -> new CustomException(ErrorCode.COLUMN_NOT_FOUND));
-
-        //===== 권한 확인 =====//
-        User user = userRepository.findByAccount(authentication.getName()).orElseThrow(
-                () -> new CustomException(ErrorCode.USER_NOT_FOUND));
-
-        Member member = memberRepository.findByMemberAndTeam(user, team).orElseThrow(
-                () -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
-        //===== 권한 확인 =====//
 
         if (columnId != request.getColumnId()) {
             //case 1 -> 컬럼 변경
@@ -122,10 +110,8 @@ public class TicketService {
             changedColumnTickets.forEach(tk -> {
                 tk.updateTicketOrder(tk.getTicketOrder() + 1);
             });
-
             ticket.updateTicketOrder(request.getTicketOrder());
-
-
+            ticket.updateColumn(changedColumn);
         } else {
             //case 2 -> 컬럼 변경 x, 순서만 변경
             int min = Math.min(request.getTicketOrder(), ticket.getTicketOrder());
@@ -134,7 +120,7 @@ public class TicketService {
             List<Ticket> tickets = ticketRepository.findByTicketOrderBetween(min, max);
 
             int offset = ticket.getTicketOrder() < request.getTicketOrder() ? -1 : 1;
-            // 2-> 4번으로
+
             tickets.forEach(tk -> {
                 if (tk.getTicketOrder() == ticketId) {
                     tk.updateTicketOrder(request.getTicketOrder());
