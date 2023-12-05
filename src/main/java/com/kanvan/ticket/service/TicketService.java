@@ -66,24 +66,22 @@ public class TicketService {
     }
 
     @Transactional
-    public void update(Long teamId, Long columnId, Long ticketId,
-                       TicketUpdateRequest request, Authentication authentication) {
+    public void update(Long teamId, int columnId, int ticketId, TicketUpdateRequest request) {
 
-        Ticket ticket = ticketRepository.findById(ticketId).orElseThrow(
-                () -> new CustomException(ErrorCode.TICKET_NOT_FOUND));
-
-        Columns column = columnRepository.findColumnsByIdAndTeamId(columnId, teamId).orElseThrow(
+        //컬럼 먼저 찾고 -> teamId and columnOrder
+        Columns column = columnRepository.findByTeamIdAndColumnOrder(teamId, columnId).orElseThrow(
                 () -> new CustomException(ErrorCode.COLUMN_NOT_FOUND));
-
-        User user = userRepository.findByAccount(authentication.getName()).orElseThrow(
-                () -> new CustomException(ErrorCode.USER_NOT_FOUND));
-
-        Member member = memberRepository.findByMemberAndTeamId(user, teamId).orElseThrow(
-                () -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
-
+        //티켓 찾고 -> 컬럼의 columnOrder and ticketId
+        Ticket ticket = ticketRepository.findByTicketOrderAndColumnId(ticketId, column.getId()).orElseThrow(
+                () -> new CustomException(ErrorCode.TICKET_NOT_FOUND));
+        //바꿀 유저 찾고
         User changedUser = userRepository.findByAccount(request.getMemberAccount()).orElseThrow(
                 () -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        //바꿀 유저 멤버인지 확인하고
+        Member member = memberRepository.findByMemberAndTeamId(changedUser, teamId).orElseThrow(
+                () -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
 
+        //업데이트
         ticket.update(request.getTitle(), request.getTag(), request.getWorkingTime(),
                 request.getDeadline(), changedUser);
     }

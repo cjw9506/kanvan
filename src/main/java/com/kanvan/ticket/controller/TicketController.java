@@ -31,13 +31,13 @@ public class TicketController {
     }
 
     @PatchMapping("/teams/{teamId}/columns/{columnId}/tickets/{ticketId}")
+    @PreAuthorize("hasAnyAuthority(#teamId + '_LEADER', #teamId + '_MEMBER')")
     public ResponseEntity<?> updateFields(@PathVariable(name = "teamId") Long teamId,
-                                    @PathVariable(name = "columnId") Long columnId,
-                                    @PathVariable(name = "ticketId") Long ticketId,
-                                    @Valid @RequestBody TicketUpdateRequest request,
-                                    Authentication authentication) {
+                                    @PathVariable(name = "columnId") int columnOrder,
+                                    @PathVariable(name = "ticketId") int ticketOrder,
+                                    @Valid @RequestBody TicketUpdateRequest request) {
 
-        ticketService.update(teamId, columnId, ticketId, request, authentication);
+        ticketService.update(teamId, columnOrder, ticketOrder, request);
 
         return ResponseEntity.status(HttpStatus.OK).body(null);
     }
