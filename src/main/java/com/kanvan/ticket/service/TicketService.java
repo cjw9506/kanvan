@@ -131,23 +131,13 @@ public class TicketService {
     }
 
     @Transactional
-    public void delete(String teamName, int columnId, int ticketId, Authentication authentication) {
-        Ticket ticket = ticketRepository.findByTicketOrder(ticketId).orElseThrow(
-                () -> new CustomException(ErrorCode.TICKET_NOT_FOUND));
+    public void delete(Long teamId, int columnId, int ticketId) {
 
-        Team team = teamRepository.findByTeamName(teamName).orElseThrow(
-                () -> new CustomException(ErrorCode.TEAM_NOT_FOUND));
-
-        Columns column = columnRepository.findByTeamAndColumnOrder(team, columnId).orElseThrow(
+        Columns column = columnRepository.findByTeamIdAndColumnOrder(teamId, columnId).orElseThrow(
                 () -> new CustomException(ErrorCode.COLUMN_NOT_FOUND));
 
-        //===== 권한 확인 =====//
-        User user = userRepository.findByAccount(authentication.getName()).orElseThrow(
-                () -> new CustomException(ErrorCode.USER_NOT_FOUND));
-
-        Member member = memberRepository.findByMemberAndTeam(user, team).orElseThrow(
-                () -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
-        //===== 권한 확인 =====//
+        Ticket ticket = ticketRepository.findByTicketOrderAndColumnId(ticketId, column.getId()).orElseThrow(
+                () -> new CustomException(ErrorCode.TICKET_NOT_FOUND));
 
         ticketRepository.delete(ticket);
 

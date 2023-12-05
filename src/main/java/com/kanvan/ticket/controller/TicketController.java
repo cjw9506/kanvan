@@ -54,12 +54,12 @@ public class TicketController {
         return ResponseEntity.status(HttpStatus.OK).body(null);
     }
 
-    @DeleteMapping("/{teamName}/columns/{columnId}/tickets/{ticketId}")
-    public ResponseEntity<?> delete(@PathVariable(name = "teamName") String teamName,
-                                    @PathVariable(name = "columnId") int columnId,
-                                    @PathVariable(name = "ticketId") int ticketId,
-                                    Authentication authentication) {
-        ticketService.delete(teamName, columnId, ticketId, authentication);
+    @DeleteMapping("/teams/{teamId}/columns/{columnId}/tickets/{ticketId}")
+    @PreAuthorize("hasAnyAuthority(#teamId + '_LEADER', #teamId + '_MEMBER')")
+    public ResponseEntity<?> delete(@PathVariable(name = "teamId") Long teamId,
+                                    @PathVariable(name = "columnId") int columnOrder,
+                                    @PathVariable(name = "ticketId") int ticketOrder) {
+        ticketService.delete(teamId, columnOrder, ticketOrder);
 
         return ResponseEntity.status(HttpStatus.OK).body(null);
     }
