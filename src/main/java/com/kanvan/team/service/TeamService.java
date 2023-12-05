@@ -125,30 +125,23 @@ public class TeamService {
                 .build();
     }
 
-    public TeamDetailResponse getTeam(Long teamId, Authentication authentication) {
-
-        User user = userRepository.findByAccount(authentication.getName()).orElseThrow(
-                () -> new CustomException(ErrorCode.USER_NOT_FOUND));
+    public TeamDetailResponse getTeam(Long teamId) {
 
         Team team = teamRepository.findById(teamId).orElseThrow(
                 () -> new CustomException(ErrorCode.TEAM_NOT_FOUND));
 
         List<Member> members = memberRepository.findByTeam(team);
 
-        if (members.stream().anyMatch(member -> member.getMember().equals(user))) {
-            List<TeamMemberResponse> response = members.stream()
-                    .map(member -> new TeamMemberResponse(member.getMember().getId(),
-                            member.getRole(), member.getMember().getUsername()))
-                    .collect(Collectors.toList());
+        List<TeamMemberResponse> response = members.stream()
+                .map(member -> new TeamMemberResponse(member.getMember().getId(),
+                        member.getRole(), member.getMember().getUsername()))
+                .collect(Collectors.toList());
 
-            return TeamDetailResponse.builder()
-                    .teamId(teamId)
-                    .teamName(team.getTeamName())
-                    .members(response)
-                    .build();
-        } else {
-            throw new CustomException(ErrorCode.MEMBER_NOT_FOUND);
-        }
+        return TeamDetailResponse.builder()
+                .teamId(teamId)
+                .teamName(team.getTeamName())
+                .members(response)
+                .build();
     }
 
     public List<InvitesResponse> getInvites(Authentication authentication) {

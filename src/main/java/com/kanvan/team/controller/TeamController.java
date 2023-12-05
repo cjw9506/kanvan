@@ -46,17 +46,17 @@ public class TeamController {
         return ResponseEntity.status(OK).body(null);
     }
 
-    @GetMapping
+    @GetMapping("/teams")
     public ResponseEntity<?> getTeams(Authentication authentication) {
         TeamsResponse response = teamService.getTeams(authentication);
 
         return ResponseEntity.status(OK).body(response);
     }
 
-    @GetMapping("/{teamId}")
-    public ResponseEntity<?> getTeam(@PathVariable(name = "teamId") Long teamId,
-                                     Authentication authentication) {
-        TeamDetailResponse response = teamService.getTeam(teamId, authentication);
+    @GetMapping("/teams/{teamId}")
+    @PreAuthorize("hasAnyAuthority(#teamId + '_LEADER', #teamId + '_MEMBER')")
+    public ResponseEntity<?> getTeam(@PathVariable(name = "teamId") Long teamId) {
+        TeamDetailResponse response = teamService.getTeam(teamId);
 
         return ResponseEntity.status(OK).body(response);
     }
