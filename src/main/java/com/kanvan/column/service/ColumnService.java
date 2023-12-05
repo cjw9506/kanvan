@@ -5,16 +5,10 @@ import com.kanvan.column.dto.*;
 import com.kanvan.column.repository.ColumnRepository;
 import com.kanvan.common.exception.CustomException;
 import com.kanvan.common.exception.ErrorCode;
-import com.kanvan.team.domain.Member;
 import com.kanvan.team.domain.Team;
-import com.kanvan.team.domain.TeamRole;
-import com.kanvan.team.repository.MemberRepository;
 import com.kanvan.team.repository.TeamRepository;
 import com.kanvan.ticket.repository.TicketRepository;
-import com.kanvan.user.domain.User;
-import com.kanvan.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,9 +21,7 @@ import java.util.stream.Collectors;
 public class ColumnService {
 
     private final ColumnRepository columnRepository;
-    private final UserRepository userRepository;
     private final TeamRepository teamRepository;
-    private final MemberRepository memberRepository;
     private final TicketRepository ticketRepository;
 
     @Transactional
@@ -117,26 +109,19 @@ public class ColumnService {
     }
 
     @Transactional
-    public void deleteColumn(Long columnId, ColumnDeleteRequest request, Authentication authentication) {
-        User user = userRepository.findByAccount(authentication.getName()).orElseThrow(
-                () -> new CustomException(ErrorCode.USER_NOT_FOUND));
+    public void deleteColumn(Long teamId, int columnOrder) {
 
-        Team team = teamRepository.findById(request.getTeamId()).orElseThrow(
-                () -> new CustomException(ErrorCode.TEAM_NOT_FOUND));
-
-        Member member = memberRepository.findByMemberAndTeam(user, team).orElseThrow(
-                () -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
-
-        if (member.getRole() != TeamRole.LEADER) throw new CustomException(ErrorCode.MEMBER_NOT_LEADER);
-
-        Columns columnToBeDeleted = columnRepository.findById(columnId).orElseThrow(
+        Columns column = columnRepository.findByTeamIdAndColumnOrder(teamId, columnOrder).orElseThrow(
                 () -> new CustomException(ErrorCode.COLUMN_NOT_FOUND));
 
-        List<Columns> columns = columnRepository.findByColumnOrderGreaterThan(columnToBeDeleted.getColumnOrder());
+        if (ticketRepository.findByColumn(column).isEmpty()) {
+            columnRepository.delete(column);
+            List<Columns> columns = columnRepository.findByColumnOrderGreaterThan(column.getColumnOrder());
+            columns.forEach(col -> col.updateColumnOrder(col.getColumnOrder() - 1));
 
-        columns.forEach(column -> column.updateColumnOrder(column.getColumnOrder() - 1));
-
-        columnRepository.delete(columnToBeDeleted);
+        } else {
+            throw new CustomException(ErrorCode.COLUMN_NOT_EMPTY);
+        }
     }
 
 

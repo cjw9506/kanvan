@@ -58,12 +58,12 @@ public class ColumnController {
         return ResponseEntity.status(HttpStatus.OK).body(null);
     }
 
-    @DeleteMapping("/{columnId}")
-    public ResponseEntity<?> deleteColumn(@PathVariable(name = "columnId") Long columnId,
-                                          @RequestBody ColumnDeleteRequest request,
-                                          Authentication authentication) {
+    @DeleteMapping("/teams/{teamId}/columns/{columnId}")
+    @PreAuthorize("hasAuthority(#teamId + '_LEADER')")
+    public ResponseEntity<?> deleteColumn(@PathVariable(name = "teamId") Long teamId,
+                                          @PathVariable(name = "columnId") int columnOrder) {
 
-        columnService.deleteColumn(columnId, request, authentication);
+        columnService.deleteColumn(teamId, columnOrder);
 
         return ResponseEntity.status(HttpStatus.OK).body(null);
 
