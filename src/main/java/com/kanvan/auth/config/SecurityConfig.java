@@ -14,6 +14,7 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.POST;
 
 @Configuration
@@ -33,7 +34,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(request -> request
                         .requestMatchers(POST, "/api/auth/signup").permitAll()
                         .requestMatchers(POST, "/api/auth/login").permitAll()
-                        //.requestMatchers(GET, "/api/test").permitAll()
+                        .requestMatchers(GET,"/swagger*/**").permitAll()
                         .anyRequest().authenticated()
                 )
 
