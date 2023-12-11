@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kanvan.auth.filter.JwtAuthenticationFilter;
 import com.kanvan.column.dto.*;
 import com.kanvan.column.service.ColumnService;
+import com.kanvan.common.exception.CustomException;
+import com.kanvan.common.exception.ErrorCode;
 import com.kanvan.ticket.domain.Tag;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -166,7 +168,36 @@ class ColumnControllerTest {
         verify(columnService).updateColumnOrder(any(Long.class), any(Integer.class), any(ColumnUpdateRequest.class));
     }
 
+    @DisplayName("컬럼 삭제 성공")
+    @WithMockUser
+    @Test
+    void deleteColumn() throws Exception {
 
+        doNothing().when(columnService).deleteColumn(1L, 2);
+
+        mockMvc.perform(delete("/api/teams/1/columns/1").with(csrf())
+                        .contentType(APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk());
+
+        verify(columnService).deleteColumn(any(Long.class), any(Integer.class));
+    }
+
+    @DisplayName("컬럼 삭제 실패")
+    @WithMockUser
+    @Test
+    void deleteColumnFailed() throws Exception {
+
+        doThrow(new CustomException(ErrorCode.COLUMN_NOT_EMPTY))
+                .when(columnService).deleteColumn(1L, 2);
+
+        mockMvc.perform(delete("/api/teams/1/columns/2").with(csrf())
+                        .contentType(APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isBadRequest());
+
+        verify(columnService).deleteColumn(any(Long.class), any(Integer.class));
+    }
 
 
 }
