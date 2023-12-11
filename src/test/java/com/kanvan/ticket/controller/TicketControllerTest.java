@@ -5,6 +5,7 @@ import com.kanvan.auth.filter.JwtAuthenticationFilter;
 import com.kanvan.column.dto.ColumnCreateRequest;
 import com.kanvan.ticket.domain.Tag;
 import com.kanvan.ticket.dto.TicketCreateRequest;
+import com.kanvan.ticket.dto.TicketUpdateRequest;
 import com.kanvan.ticket.service.TicketService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -22,6 +23,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -65,5 +67,34 @@ class TicketControllerTest {
 
         verify(ticketService).create(any(Long.class), any(Integer.class), any(TicketCreateRequest.class));
     }
+
+    @DisplayName("티켓 필드 수정")
+    @WithMockUser
+    @Test
+    void updateTicketFields() throws Exception {
+
+        TicketUpdateRequest request = TicketUpdateRequest.builder()
+                .title("로그인 기능 구현")
+                .tag(Tag.BACKEND)
+                .workingTime("3 hour")
+                .deadline("sep 12")
+                .memberAccount("account1")
+                .build();
+
+        doNothing().when(ticketService).update(1L, 1, 1, request);
+
+        String json = objectMapper.writeValueAsString(request);
+
+        mockMvc.perform(patch("/api/teams/1/columns/1/tickets/1").with(csrf())
+                        .content(json)
+                        .contentType(APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk());
+
+        verify(ticketService).update(any(Long.class), any(Integer.class),
+                any(Integer.class), any(TicketUpdateRequest.class));
+    }
+
+
 
 }
