@@ -2,7 +2,6 @@ package com.kanvan.ticket.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kanvan.auth.filter.JwtAuthenticationFilter;
-import com.kanvan.column.dto.ColumnCreateRequest;
 import com.kanvan.ticket.domain.Tag;
 import com.kanvan.ticket.dto.TicketCreateRequest;
 import com.kanvan.ticket.dto.TicketOrderUpdateRequest;
@@ -24,8 +23,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -120,6 +118,20 @@ class TicketControllerTest {
                 any(Integer.class), any(TicketOrderUpdateRequest.class));
     }
 
+    @DisplayName("티켓 삭제")
+    @WithMockUser
+    @Test
+    void deleteTicket() throws Exception {
 
+        doNothing().when(ticketService).delete(1L, 1, 1);
+
+        mockMvc.perform(delete("/api/teams/1/columns/1/tickets/1").with(csrf())
+                        .contentType(APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk());
+
+        verify(ticketService).delete(any(Long.class), any(Integer.class),
+                any(Integer.class));
+    }
 
 }
