@@ -2,10 +2,7 @@ package com.kanvan.column.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kanvan.auth.filter.JwtAuthenticationFilter;
-import com.kanvan.column.dto.ColumnCreateRequest;
-import com.kanvan.column.dto.ColumnUpdateNameRequest;
-import com.kanvan.column.dto.ColumnsResponse;
-import com.kanvan.column.dto.TicketResponse;
+import com.kanvan.column.dto.*;
 import com.kanvan.column.service.ColumnService;
 import com.kanvan.ticket.domain.Tag;
 import org.junit.jupiter.api.DisplayName;
@@ -146,6 +143,30 @@ class ColumnControllerTest {
 
         verify(columnService).updateColumnName(any(Long.class), any(Integer.class), any(ColumnUpdateNameRequest.class));
     }
+
+    @DisplayName("컬럼 순서 변경")
+    @WithMockUser
+    @Test
+    void columnUpdateOrder() throws Exception {
+
+        ColumnUpdateRequest request = ColumnUpdateRequest.builder()
+                .columnOrder(3)
+                .build();
+
+        doNothing().when(columnService).updateColumnOrder(1L, 1, request);
+
+        String json = objectMapper.writeValueAsString(request);
+
+        mockMvc.perform(patch("/api/teams/1/columns/1/order").with(csrf())
+                        .content(json)
+                        .contentType(APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk());
+
+        verify(columnService).updateColumnOrder(any(Long.class), any(Integer.class), any(ColumnUpdateRequest.class));
+    }
+
+
 
 
 }
