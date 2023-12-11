@@ -274,6 +274,33 @@ class TeamControllerTest {
 
     }
 
+    @DisplayName("초대 목록 조회")
+    @WithMockUser
+    @Test
+    void getInvites() throws Exception {
+
+        InvitesResponse response1 = InvitesResponse.builder()
+                .inviteId(1L)
+                .teamName("지원팀1")
+                .build();
+        InvitesResponse response2 = InvitesResponse.builder()
+                .inviteId(2L)
+                .teamName("지원팀2")
+                .build();
+
+        List<InvitesResponse> response = List.of(response1, response2);
+
+        when(teamService.getInvites(any(Authentication.class))).thenReturn(response);
+
+        mockMvc.perform(get("/api/invites").with(csrf())
+                        .contentType(APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk());
+
+        verify(teamService).getInvites(any(Authentication.class));
+
+    }
+
 
 
 
