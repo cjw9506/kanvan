@@ -5,9 +5,7 @@ import com.kanvan.auth.filter.JwtAuthenticationFilter;
 import com.kanvan.common.exception.CustomException;
 import com.kanvan.common.exception.ErrorCode;
 import com.kanvan.team.domain.Invite;
-import com.kanvan.team.dto.MemberInviteDecideRequest;
-import com.kanvan.team.dto.MemberInviteRequest;
-import com.kanvan.team.dto.TeamCreateRequest;
+import com.kanvan.team.dto.*;
 import com.kanvan.team.service.TeamService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -20,11 +18,12 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.List;
+
 import static org.mockito.Mockito.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -206,6 +205,39 @@ class TeamControllerTest {
                 .andExpect(status().isOk());
 
     }
+
+    @DisplayName("팀 목록 조회")
+    @WithMockUser
+    @Test
+    void getTeams() throws Exception {
+
+        TeamResponse team1 = TeamResponse.builder()
+                .teamId(1L)
+                .teamName("지원팀")
+                .build();
+
+        TeamResponse team2 = TeamResponse.builder()
+                .teamId(2L)
+                .teamName("지원팀2")
+                .build();
+
+        TeamsResponse response = TeamsResponse.builder()
+                .teams(List.of(team1, team2))
+                .build();
+
+        when(teamService.getTeams(any(Authentication.class))).thenReturn(response);
+
+        mockMvc.perform(get("/api/teams").with(csrf())
+                        .contentType(APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.teams[0].teamName").value("지원팀"))
+                .andExpect(jsonPath("$.teams[1].teamName").value("지원팀2"));
+
+        verify(teamService).getTeams(any(Authentication.class));
+
+    }
+
 
 
 
