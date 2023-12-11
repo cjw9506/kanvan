@@ -5,8 +5,10 @@ import com.kanvan.auth.filter.JwtAuthenticationFilter;
 import com.kanvan.common.exception.CustomException;
 import com.kanvan.common.exception.ErrorCode;
 import com.kanvan.team.domain.Invite;
+import com.kanvan.team.domain.TeamRole;
 import com.kanvan.team.dto.*;
 import com.kanvan.team.service.TeamService;
+import com.kanvan.user.domain.Role;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -238,6 +240,39 @@ class TeamControllerTest {
 
     }
 
+    @DisplayName("팀 단건 조회")
+    @WithMockUser
+    @Test
+    void getTeam() throws Exception {
+
+        TeamMemberResponse leader = TeamMemberResponse.builder()
+                .userId(1L)
+                .username("정지원")
+                .role(TeamRole.LEADER)
+                .build();
+
+        TeamMemberResponse member = TeamMemberResponse.builder()
+                .userId(2L)
+                .username("지원정")
+                .role(TeamRole.MEMBER)
+                .build();
+
+        TeamDetailResponse response = TeamDetailResponse.builder()
+                .teamId(1L)
+                .teamName("지원팀")
+                .members(List.of(leader, member))
+                .build();
+
+        when(teamService.getTeam(1L)).thenReturn(response);
+
+        mockMvc.perform(get("/api/teams/1").with(csrf())
+                        .contentType(APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk());
+
+        verify(teamService).getTeam(any(Long.class));
+
+    }
 
 
 
