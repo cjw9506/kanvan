@@ -5,6 +5,7 @@ import com.kanvan.auth.filter.JwtAuthenticationFilter;
 import com.kanvan.column.dto.ColumnCreateRequest;
 import com.kanvan.ticket.domain.Tag;
 import com.kanvan.ticket.dto.TicketCreateRequest;
+import com.kanvan.ticket.dto.TicketOrderUpdateRequest;
 import com.kanvan.ticket.dto.TicketUpdateRequest;
 import com.kanvan.ticket.service.TicketService;
 import org.junit.jupiter.api.DisplayName;
@@ -93,6 +94,30 @@ class TicketControllerTest {
 
         verify(ticketService).update(any(Long.class), any(Integer.class),
                 any(Integer.class), any(TicketUpdateRequest.class));
+    }
+
+    @DisplayName("티켓 순서 수정")
+    @WithMockUser
+    @Test
+    void updateOrderFields() throws Exception {
+
+        TicketOrderUpdateRequest request = TicketOrderUpdateRequest.builder()
+                .columnId(2)
+                .ticketOrder(2)
+                .build();
+
+        doNothing().when(ticketService).updateOrders(1L, 1, 1, request);
+
+        String json = objectMapper.writeValueAsString(request);
+
+        mockMvc.perform(patch("/api/teams/1/columns/1/tickets/1/order").with(csrf())
+                        .content(json)
+                        .contentType(APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk());
+
+        verify(ticketService).updateOrders(any(Long.class), any(Integer.class),
+                any(Integer.class), any(TicketOrderUpdateRequest.class));
     }
 
 
