@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kanvan.auth.filter.JwtAuthenticationFilter;
 import com.kanvan.common.exception.CustomException;
 import com.kanvan.common.exception.ErrorCode;
+import com.kanvan.team.domain.Invite;
+import com.kanvan.team.dto.MemberInviteDecideRequest;
 import com.kanvan.team.dto.MemberInviteRequest;
 import com.kanvan.team.dto.TeamCreateRequest;
 import com.kanvan.team.service.TeamService;
@@ -21,6 +23,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import static org.mockito.Mockito.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -155,6 +158,52 @@ class TeamControllerTest {
                         .contentType(APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isNotFound());
+
+    }
+
+    @DisplayName("초대 수락")
+    @WithMockUser
+    @Test
+    void acceptInvite() throws Exception {
+
+        MemberInviteDecideRequest request = MemberInviteDecideRequest.builder()
+                .invite(Invite.ACCEPT)
+                .build();
+
+        Authentication authentication = mock(Authentication.class);
+
+        doNothing().when(teamService).decide(request, 1L, authentication);
+
+        String json = objectMapper.writeValueAsString(request);
+
+        mockMvc.perform(patch("/api/invites/1").with(csrf())
+                        .content(json)
+                        .contentType(APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk());
+
+    }
+
+    @DisplayName("초대 거절")
+    @WithMockUser
+    @Test
+    void refuseInvite() throws Exception {
+
+        MemberInviteDecideRequest request = MemberInviteDecideRequest.builder()
+                .invite(Invite.REFUSE)
+                .build();
+
+        Authentication authentication = mock(Authentication.class);
+
+        doNothing().when(teamService).decide(request, 1L, authentication);
+
+        String json = objectMapper.writeValueAsString(request);
+
+        mockMvc.perform(patch("/api/invites/1").with(csrf())
+                        .content(json)
+                        .contentType(APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk());
 
     }
 
