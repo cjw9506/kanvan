@@ -3,6 +3,7 @@ package com.kanvan.column.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kanvan.auth.filter.JwtAuthenticationFilter;
 import com.kanvan.column.dto.ColumnCreateRequest;
+import com.kanvan.column.dto.ColumnUpdateNameRequest;
 import com.kanvan.column.dto.ColumnsResponse;
 import com.kanvan.column.dto.TicketResponse;
 import com.kanvan.column.service.ColumnService;
@@ -24,8 +25,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -124,4 +124,28 @@ class ColumnControllerTest {
         verify(columnService).getColumns(any(Long.class));
 
     }
+
+    @DisplayName("컬럼 이름 수정")
+    @WithMockUser
+    @Test
+    void columnUpdateName() throws Exception {
+
+        ColumnUpdateNameRequest request = ColumnUpdateNameRequest.builder()
+                .name("update title")
+                .build();
+
+        doNothing().when(columnService).updateColumnName(1L, 1, request);
+
+        String json = objectMapper.writeValueAsString(request);
+
+        mockMvc.perform(patch("/api/teams/1/columns/1").with(csrf())
+                        .content(json)
+                        .contentType(APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk());
+
+        verify(columnService).updateColumnName(any(Long.class), any(Integer.class), any(ColumnUpdateNameRequest.class));
+    }
+
+
 }
